@@ -5,7 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Playground\TransfersModule.csproj" />
     <ProjectReference Include="..\UsersService\UsersService.csproj" />
   </ItemGroup>
 
