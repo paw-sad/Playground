@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Playground.Events
+namespace TransfersModule.Events
 {
     internal class TransferCreatedEvent
     {

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -15,7 +15,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Playground\Playground.csproj" />
+    <ProjectReference Include="..\Playground\TransfersModule.csproj" />
+    <ProjectReference Include="..\PublicApi\PublicApi.csproj" />
+    <ProjectReference Include="..\UsersService\UsersService.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Playground.Persistence;
+using TransfersModule.Persistence;
 
-namespace Playground.Contract
+namespace TransfersModule.Contract
 {
     public class GetTransferByIdRequest
     {

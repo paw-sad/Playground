@@ -1,7 +1,7 @@
-﻿using Playground.Contract;
-using Playground.Persistence;
+﻿using TransfersModule.Contract;
+using TransfersModule.Persistence;
 
-namespace Playground.Queries
+namespace TransfersModule.Queries
 {
     internal class GetTransferInstructionByIdQuery
     {

@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Playground.Contract;
-using Playground.Persistence;
+﻿using TransfersModule.Contract;
+using TransfersModule.Persistence;
 
-namespace Playground.Queries
+namespace TransfersModule.Queries
 {
     internal class GetTransferByIdQuery
     {

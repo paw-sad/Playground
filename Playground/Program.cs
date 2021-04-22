@@ -1,14 +1,13 @@
-﻿using Playground.Commands;
-using Playground.Events;
-using Playground.Contract;
-using Playground.Persistence;
-using Playground.Queries;
+﻿using TransfersModule.Commands;
+using TransfersModule.Contract;
+using TransfersModule.Persistence;
+using TransfersModule.Queries;
 
-namespace Playground
+namespace TransfersModule
 {
-    public static class ProgramAPI
+    public static class Api
     {
-        static ProgramAPI()
+        static Api()
         {
             using var db = new AppDbContext();
             db.Database.EnsureDeleted();

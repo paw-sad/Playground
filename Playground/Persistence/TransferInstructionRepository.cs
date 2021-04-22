@@ -1,7 +1,7 @@
-﻿using Playground.Events;
-using System;
+﻿using System;
+using TransfersModule.Events;
 
-namespace Playground.Persistence
+namespace TransfersModule.Persistence
 {
     internal class TransferInstructionRepository
     {

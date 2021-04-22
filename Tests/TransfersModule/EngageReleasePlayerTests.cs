@@ -1,12 +1,12 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Playground;
-using Playground.Contract;
-using Playground.Persistence;
+using TransfersModule;
+using TransfersModule.Contract;
+using TransfersModule.Persistence;
 using Shouldly;
 
-namespace Tests
+namespace Tests.TransfersModule
 {
     [TestClass]
     public class EngageReleasePlayerTests
@@ -31,12 +31,12 @@ namespace Tests
                 PaymentsAmount = 0,
                 TransferDate = new DateTime(2020, 01, 01)
             };
-            
+
             // when calling engage
-            var response = TransfersAPI.EngageWithTransferAgreement(request);
+            var response = Api.EngageWithTransferAgreement(request);
 
             // then i should get new engaging transfer instruction
-            var transferInstruction = TransfersAPI.GetTransferInstructionById(new GetTransferInstructionByIdRequest
+            var transferInstruction = Api.GetTransferInstructionById(new GetTransferInstructionByIdRequest
             {
                 Id = response.TransferInstructionId
             });
@@ -58,10 +58,10 @@ namespace Tests
             };
 
             // when calling engage
-            var response = TransfersAPI.ReleasePlayer(request);
+            var response = Api.ReleasePlayer(request);
 
             // then i should get new engaging transfer instruction
-            var transferInstruction = TransfersAPI.GetTransferInstructionById(new GetTransferInstructionByIdRequest
+            var transferInstruction = Api.GetTransferInstructionById(new GetTransferInstructionByIdRequest
             {
                 Id = response.TransferInstructionId
             });
@@ -81,24 +81,24 @@ namespace Tests
                 TransferDate = new DateTime(2020, 01, 01)
             };
 
-            var engageResponse = TransfersAPI.EngageWithTransferAgreement(engageRequest);
+            var engageResponse = Api.EngageWithTransferAgreement(engageRequest);
             var releaseRequest = new ReleasePlayerRequest
             {
                 ReleasingClubId = 1,
                 EngagingClubId = 2,
-                PlayerId = 1,   
+                PlayerId = 1,
                 PaymentsAmount = 0,
                 TransferDate = new DateTime(2020, 01, 01)
             };
-            var releaseResponse = TransfersAPI.ReleasePlayer(releaseRequest);
+            var releaseResponse = Api.ReleasePlayer(releaseRequest);
 
-            var engageInstruction = TransfersAPI.GetTransferInstructionById(new GetTransferInstructionByIdRequest
+            var engageInstruction = Api.GetTransferInstructionById(new GetTransferInstructionByIdRequest
             {
                 Id = engageResponse.TransferInstructionId
             });
             engageInstruction.TransferId.ShouldNotBeNull();
 
-            var releaseInstruction = TransfersAPI.GetTransferInstructionById(new GetTransferInstructionByIdRequest
+            var releaseInstruction = Api.GetTransferInstructionById(new GetTransferInstructionByIdRequest
             {
                 Id = releaseResponse.TransferInstructionId
             });
@@ -117,7 +117,7 @@ namespace Tests
                 PaymentsAmount = 0,
                 TransferDate = new DateTime(2020, 01, 01)
             };
-            var releaseResponse = TransfersAPI.ReleasePlayer(releaseRequest);
+            var releaseResponse = Api.ReleasePlayer(releaseRequest);
 
             // given new request with payments equal 0
             var engageRequest = new EngageWithTransferAgreementRequest
@@ -129,22 +129,22 @@ namespace Tests
                 TransferDate = new DateTime(2020, 01, 01)
             };
 
-            var engageResponse = TransfersAPI.EngageWithTransferAgreement(engageRequest);
+            var engageResponse = Api.EngageWithTransferAgreement(engageRequest);
 
-            var engageInstruction = TransfersAPI.GetTransferInstructionById(new GetTransferInstructionByIdRequest
+            var engageInstruction = Api.GetTransferInstructionById(new GetTransferInstructionByIdRequest
             {
                 Id = engageResponse.TransferInstructionId
             });
             engageInstruction.TransferId.ShouldNotBeNull();
 
-            var releaseInstruction = TransfersAPI.GetTransferInstructionById(new GetTransferInstructionByIdRequest
+            var releaseInstruction = Api.GetTransferInstructionById(new GetTransferInstructionByIdRequest
             {
                 Id = releaseResponse.TransferInstructionId
             });
 
             releaseInstruction.TransferId.ShouldNotBeNull();
-        }    
-        
+        }
+
         [TestMethod]
         public void DontPairTwoEngagingInstructions()
         {
@@ -157,16 +157,16 @@ namespace Tests
                 TransferDate = new DateTime(2020, 01, 01)
             };
 
-            var engageResponse1 = TransfersAPI.EngageWithTransferAgreement(engageRequest);
+            var engageResponse1 = Api.EngageWithTransferAgreement(engageRequest);
 
-            var engageInstruction1 = TransfersAPI.GetTransferInstructionById(new GetTransferInstructionByIdRequest
+            var engageInstruction1 = Api.GetTransferInstructionById(new GetTransferInstructionByIdRequest
             {
                 Id = engageResponse1.TransferInstructionId
             });
 
-            var engageResponse2 = TransfersAPI.EngageWithTransferAgreement(engageRequest);
+            var engageResponse2 = Api.EngageWithTransferAgreement(engageRequest);
 
-            var engageInstruction2 = TransfersAPI.GetTransferInstructionById(new GetTransferInstructionByIdRequest
+            var engageInstruction2 = Api.GetTransferInstructionById(new GetTransferInstructionByIdRequest
             {
                 Id = engageResponse2.TransferInstructionId
             });
@@ -187,9 +187,9 @@ namespace Tests
                 TransferDate = new DateTime(2020, 01, 01)
             };
 
-            var engageResponse1 = TransfersAPI.EngageWithTransferAgreement(engageRequest);
+            var engageResponse1 = Api.EngageWithTransferAgreement(engageRequest);
 
-            var engageResponse2 = TransfersAPI.EngageWithTransferAgreement(engageRequest);
+            var engageResponse2 = Api.EngageWithTransferAgreement(engageRequest);
 
             var releaseRequest = new ReleasePlayerRequest
             {
@@ -199,19 +199,19 @@ namespace Tests
                 PaymentsAmount = 0,
                 TransferDate = new DateTime(2020, 01, 01)
             };
-            var releaseResponse = TransfersAPI.ReleasePlayer(releaseRequest);
+            var releaseResponse = Api.ReleasePlayer(releaseRequest);
 
-            var engageInstruction1 = TransfersAPI.GetTransferInstructionById(new GetTransferInstructionByIdRequest
+            var engageInstruction1 = Api.GetTransferInstructionById(new GetTransferInstructionByIdRequest
             {
                 Id = engageResponse1.TransferInstructionId
             });
 
-            var engageInstruction2 = TransfersAPI.GetTransferInstructionById(new GetTransferInstructionByIdRequest
+            var engageInstruction2 = Api.GetTransferInstructionById(new GetTransferInstructionByIdRequest
             {
                 Id = engageResponse2.TransferInstructionId
             });
 
-            var releaseInstruction = TransfersAPI.GetTransferInstructionById(new GetTransferInstructionByIdRequest
+            var releaseInstruction = Api.GetTransferInstructionById(new GetTransferInstructionByIdRequest
             {
                 Id = releaseResponse.TransferInstructionId
             });
@@ -220,11 +220,11 @@ namespace Tests
             engageInstruction2.TransferId.ShouldBeNull();
             releaseInstruction.TransferId.ShouldNotBeNull();
         }
-        
+
         [TestMethod]
         public void WhenMoreReleasingInstructionsAreAvailableShouldPairWithOldest()
         {
-          var releaseRequest = new ReleasePlayerRequest
+            var releaseRequest = new ReleasePlayerRequest
             {
                 ReleasingClubId = 1,
                 EngagingClubId = 2,
@@ -232,8 +232,8 @@ namespace Tests
                 PaymentsAmount = 0,
                 TransferDate = new DateTime(2020, 01, 01)
             };
-            var releaseResponse1 = TransfersAPI.ReleasePlayer(releaseRequest);
-            var releaseResponse2 = TransfersAPI.ReleasePlayer(releaseRequest);
+            var releaseResponse1 = Api.ReleasePlayer(releaseRequest);
+            var releaseResponse2 = Api.ReleasePlayer(releaseRequest);
             var engageRequest = new EngageWithTransferAgreementRequest
             {
                 ReleasingClubId = 1,
@@ -243,17 +243,17 @@ namespace Tests
                 TransferDate = new DateTime(2020, 01, 01)
             };
 
-            var engageResponse = TransfersAPI.EngageWithTransferAgreement(engageRequest);
-            var engageInstruction = TransfersAPI.GetTransferInstructionById(new GetTransferInstructionByIdRequest
+            var engageResponse = Api.EngageWithTransferAgreement(engageRequest);
+            var engageInstruction = Api.GetTransferInstructionById(new GetTransferInstructionByIdRequest
             {
                 Id = engageResponse.TransferInstructionId
             });
 
-            var releaseInstruction1 = TransfersAPI.GetTransferInstructionById(new GetTransferInstructionByIdRequest
+            var releaseInstruction1 = Api.GetTransferInstructionById(new GetTransferInstructionByIdRequest
             {
                 Id = releaseResponse1.TransferInstructionId
             });
-            var releaseInstruction2 = TransfersAPI.GetTransferInstructionById(new GetTransferInstructionByIdRequest
+            var releaseInstruction2 = Api.GetTransferInstructionById(new GetTransferInstructionByIdRequest
             {
                 Id = releaseResponse2.TransferInstructionId
             });

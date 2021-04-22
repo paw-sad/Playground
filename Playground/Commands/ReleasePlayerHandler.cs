@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Linq;
-using Playground.Contract;
-using Playground.Events;
-using Playground.Persistence;
+using TransfersModule.Contract;
+using TransfersModule.Events;
+using TransfersModule.Persistence;
 
-namespace Playground.Commands
+namespace TransfersModule.Commands
 {
     internal class ReleasePlayerHandler
     {

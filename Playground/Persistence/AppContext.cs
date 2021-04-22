@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace Playground.Persistence
+namespace TransfersModule.Persistence
 {
     internal class AppDbContext : DbContext
     {

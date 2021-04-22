@@ -1,7 +1,7 @@
 ﻿using System;
-using Playground.Persistence;
+using TransfersModule.Persistence;
 
-namespace Playground.Contract
+namespace TransfersModule.Contract
 {
     public class GetTransferInstructionByIdRequest
     {

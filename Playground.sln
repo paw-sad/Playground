@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31129.286
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Playground", "Playground\Playground.csproj", "{880972AB-02A3-489D-88EF-E3BD69A37BA6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TransfersModule", "Playground\TransfersModule.csproj", "{880972AB-02A3-489D-88EF-E3BD69A37BA6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "Tests\Tests.csproj", "{4FF1A3F2-4A71-4B13-BC94-DF1A5A5B6C51}"
 EndProject
@@ -11,6 +11,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PublicApi", "PublicApi\PublicApi.csproj", "{550B1072-D19B-4AA4-9D01-BC5722592E54}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UsersService", "UsersService\UsersService.csproj", "{F4800736-372E-4EAD-AA65-D49CD43E2F7D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,6 +30,14 @@ Global
 		{4FF1A3F2-4A71-4B13-BC94-DF1A5A5B6C51}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4FF1A3F2-4A71-4B13-BC94-DF1A5A5B6C51}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4FF1A3F2-4A71-4B13-BC94-DF1A5A5B6C51}.Release|Any CPU.Build.0 = Release|Any CPU
+		{550B1072-D19B-4AA4-9D01-BC5722592E54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{550B1072-D19B-4AA4-9D01-BC5722592E54}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{550B1072-D19B-4AA4-9D01-BC5722592E54}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{550B1072-D19B-4AA4-9D01-BC5722592E54}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4800736-372E-4EAD-AA65-D49CD43E2F7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4800736-372E-4EAD-AA65-D49CD43E2F7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4800736-372E-4EAD-AA65-D49CD43E2F7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4800736-372E-4EAD-AA65-D49CD43E2F7D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

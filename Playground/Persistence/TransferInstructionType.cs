@@ -1,4 +1,4 @@
-﻿namespace Playground.Persistence
+﻿namespace TransfersModule.Persistence
 {
     public enum TransferInstructionType
     {

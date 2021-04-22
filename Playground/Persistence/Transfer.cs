@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Playground.Persistence
+namespace TransfersModule.Persistence
 {
     internal class Transfer
     {

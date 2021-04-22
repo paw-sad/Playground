@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Playground.Persistence
+namespace TransfersModule.Persistence
 {
     internal class TransferInstruction
     {

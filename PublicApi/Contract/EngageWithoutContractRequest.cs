@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TransfersModule.Contract
+namespace PublicApi.Contract
 {
     public class EngageWithoutTransferAgreementRequest
     {

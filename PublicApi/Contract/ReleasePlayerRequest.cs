@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace TransfersModule.Contract
+namespace PublicApi.Contract
 {
-    public class EngageWithoutTransferAgreementRequest
+    public class ReleasePlayerRequest
     {
         public int EngagingClubId { get; set; }
         public int ReleasingClubId { get; set; }
@@ -11,8 +11,8 @@ namespace TransfersModule.Contract
         public decimal PaymentsAmount { get; set; }
     }
 
-    public class EngageWithoutTransferAgreementResponse
+    public class ReleasePlayerResponse
     {
-        public Guid TransferId { get; set; }
+        public Guid TransferInstructionId { get; set; }
     }
 }

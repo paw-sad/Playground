@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using Playground.Events;
+using TransfersModule.Commands;
+using TransfersModule.Events;
 
-namespace Playground.Persistence
+namespace TransfersModule.Persistence
 {
     internal class TransferRepository
     {

@@ -1,11 +1,11 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Playground;
-using Playground.Contract;
-using Playground.Persistence;
 using Shouldly;
+using TransfersModule;
+using TransfersModule.Contract;
+using TransfersModule.Persistence;
 
-namespace Tests
+namespace Tests.TransfersModule
 {
     [TestClass]
     public class EngageWithoutTransferAgreementTests
@@ -13,7 +13,6 @@ namespace Tests
         [TestMethod]
         public void TestTransferWithNoPayments()
         {
-            // given new request with payments equal 0
             var request = new EngageWithoutTransferAgreementRequest
             {
                 PaymentsAmount = 0,
@@ -22,12 +21,12 @@ namespace Tests
                 PlayerId = 1,
                 TransferDate = new DateTime(2020, 01, 01)
             };
-            
-            // when calling EngageWithoutTransferAgreement
-            var response = ProgramAPI.EngageWithoutTransferAgreement(request);
+
+            // when engaging player without transfer agreement and no payments
+            var response = Api.EngageWithoutTransferAgreement(request);
 
             // then i should get new completed transfer
-            var transfer = ProgramAPI.GetTransferById(new GetTransferByIdRequest
+            var transfer = Api.GetTransferById(new GetTransferByIdRequest
             {
                 Id = response.TransferId
             });
