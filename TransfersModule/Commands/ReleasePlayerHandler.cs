@@ -1,25 +1,28 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using MediatR;
 using TransfersModule.Contract;
 using TransfersModule.Events;
 using TransfersModule.Persistence;
 
 namespace TransfersModule.Commands
 {
-    internal class ReleasePlayerHandler
+    internal class ReleasePlayerHandler : IRequestHandler<ReleasePlayerContract.Request, ReleasePlayerContract.Response>
     {
         private readonly TransferInstructionRepository _transferInstructionRepository;
-        private readonly AppDbContext _db;
+        private readonly TransfersDbContext _db;
         private readonly TransferRepository _transferRepository;
 
-        public ReleasePlayerHandler(TransferInstructionRepository transferInstructionRepository, AppDbContext db, TransferRepository transferRepository)
+        public ReleasePlayerHandler(TransferInstructionRepository transferInstructionRepository, TransfersDbContext db, TransferRepository transferRepository)
         {
             _transferInstructionRepository = transferInstructionRepository;
             _db = db;
             _transferRepository = transferRepository;
         }
 
-        public ReleasePlayerResponse Handle(ReleasePlayerRequest request)
+        public async Task<ReleasePlayerContract.Response> Handle(ReleasePlayerContract.Request request, CancellationToken ct)
         {
             var e = Map(request);
             var transferInstructionId = _transferInstructionRepository.Persist(e);
@@ -49,13 +52,13 @@ namespace TransfersModule.Commands
                 _transferRepository.Persist(transferCreatedEvent);
             }
 
-            return new ReleasePlayerResponse
+            return new ReleasePlayerContract.Response
             {
                 TransferInstructionId = transferInstructionId
             };
         }
 
-        private InstructionsMatchedEvent Map(ReleasePlayerRequest request, Guid engagingInstructionId, Guid releasingInstructionId)
+        private InstructionsMatchedEvent Map(ReleasePlayerContract.Request request, Guid engagingInstructionId, Guid releasingInstructionId)
         {
             return new InstructionsMatchedEvent
             {
@@ -69,7 +72,7 @@ namespace TransfersModule.Commands
             };
         }
 
-        private ReleasePlayerInstructionCreatedEvent Map(ReleasePlayerRequest request)
+        private ReleasePlayerInstructionCreatedEvent Map(ReleasePlayerContract.Request request)
         {
             return new ReleasePlayerInstructionCreatedEvent
             {

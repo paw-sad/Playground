@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shouldly;
 using TransfersModule;
@@ -11,22 +12,21 @@ namespace Tests.TransfersModule
     public class EngageWithoutTransferAgreementTests
     {
         [TestMethod]
-        public void TestTransferWithNoPayments()
+        public async Task TestTransferWithNoPayments()
         {
-            var request = new EngageWithoutTransferAgreementRequest
+            var request = new EngageWithoutTransferAgreementContract.Request
             {
-                PaymentsAmount = 0,
                 ReleasingClubId = 1,
                 EngagingClubId = 2,
                 PlayerId = 1,
-                TransferDate = new DateTime(2020, 01, 01)
             };
 
+            var api = new TransfersApi();
             // when engaging player without transfer agreement and no payments
-            var response = Api.EngageWithoutTransferAgreement(request);
+            var response = await api.Execute(request);
 
             // then i should get new completed transfer
-            var transfer = Api.GetTransferById(new GetTransferByIdRequest
+            var transfer = await api.Execute(new GetTransferByIdContract.Request
             {
                 Id = response.TransferId
             });

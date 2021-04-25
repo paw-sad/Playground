@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using TransfersModule.Commands;
 using TransfersModule.Events;
 
 namespace TransfersModule.Persistence
 {
     internal class TransferRepository
     {
-        private readonly AppDbContext _db;
-
-        public TransferRepository(AppDbContext db)
+        private readonly TransfersDbContext _db;
+        public TransferRepository(TransfersDbContext db)
         {
             _db = db;
         }

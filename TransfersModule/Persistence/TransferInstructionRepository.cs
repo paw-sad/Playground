@@ -5,9 +5,9 @@ namespace TransfersModule.Persistence
 {
     internal class TransferInstructionRepository
     {
-        private readonly AppDbContext _db;
+        private readonly TransfersDbContext _db;
 
-        public TransferInstructionRepository(AppDbContext db)
+        public TransferInstructionRepository(TransfersDbContext db)
         {
             _db = db;
         }

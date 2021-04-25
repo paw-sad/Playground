@@ -1,10 +1,19 @@
-﻿using TransfersModule.Contract;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using MediatR;
+using TransfersModule.Contract;
 using TransfersModule.Events;
 using TransfersModule.Persistence;
 
+public interface ICommandHandler<in TCommand, TResult> :
+    IRequestHandler<TCommand, TResult>
+    where TCommand : IRequest<TResult>
+{
+}
+
 namespace TransfersModule.Commands
 {
-    internal class EngageWithoutTransferAgreementHandler
+    internal class EngageWithoutTransferAgreementHandler : IRequestHandler<EngageWithoutTransferAgreementContract.Request, EngageWithoutTransferAgreementContract.Response>
     {
         private readonly TransferRepository _transferRepository;
 
@@ -13,9 +22,9 @@ namespace TransfersModule.Commands
             _transferRepository = transferRepository;
         }
 
-        public EngageWithoutTransferAgreementResponse Handle(EngageWithoutTransferAgreementRequest engageWithoutTransferAgreementRequest)
+        public async Task<EngageWithoutTransferAgreementContract.Response> Handle(EngageWithoutTransferAgreementContract.Request request, CancellationToken ct)
         {
-            var transferCreatedEvent = Map(engageWithoutTransferAgreementRequest);
+            var transferCreatedEvent = Map(request);
             var transferId = _transferRepository.Persist(transferCreatedEvent);
 
             if (transferCreatedEvent.PaymentsAmount == 0)
@@ -28,22 +37,21 @@ namespace TransfersModule.Commands
                 _transferRepository.Persist(transferCompletedEvent);
             }
 
-            return new EngageWithoutTransferAgreementResponse
+            return new EngageWithoutTransferAgreementContract.Response
             {
                 TransferId = transferId
             };
         }
 
-        private static TransferCreatedEvent Map(EngageWithoutTransferAgreementRequest engageWithoutTransferAgreementRequest)
+        private static TransferCreatedEvent Map(EngageWithoutTransferAgreementContract.Request request)
         {
             return new TransferCreatedEvent
             {
-                EngagingClubId = engageWithoutTransferAgreementRequest.EngagingClubId,
-                ReleasingClubId = engageWithoutTransferAgreementRequest.ReleasingClubId,
-                PlayerId = engageWithoutTransferAgreementRequest.PlayerId,
-                TransferDate = engageWithoutTransferAgreementRequest.TransferDate,
-                PaymentsAmount = engageWithoutTransferAgreementRequest.PaymentsAmount
+                EngagingClubId = request.EngagingClubId,
+                ReleasingClubId = request.ReleasingClubId,
+                PlayerId = request.PlayerId,
             };
         }
+
     }
 }

@@ -15,7 +15,7 @@ namespace Tests.PublicApiTests
         {
             var userService = new UsersService.Api();
             var juventusClubId = 1;
-            var someOtherClub = 2; 
+            var someOtherClub = 2;
             userService.RegisterUser(new RegisterUserRequest
             {
                 ClubId = 1,
@@ -37,8 +37,8 @@ namespace Tests.PublicApiTests
                 PlayerId = 1,
                 ReleasingClubId = juventusClubId,
             });
-        } 
-        
+        }
+
         [TestMethod]
         public void CantReleasePlayerNotFromMyClub()
         {
@@ -59,12 +59,12 @@ namespace Tests.PublicApiTests
 
             Should.Throw<Exception>(() => api
                 .EngagePlayerWithoutTransferAgreement(new EngageWithoutTransferAgreementRequest
-            {
-                EngagingClubId = juventusClubId + 1,
-                PaymentsAmount = 0,
-                PlayerId = 1,
-                ReleasingClubId = 2,
-            }));
+                {
+                    EngagingClubId = juventusClubId + 1,
+                    PaymentsAmount = 0,
+                    PlayerId = 1,
+                    ReleasingClubId = 2,
+                }));
         }
     }
 }

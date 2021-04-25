@@ -1,27 +1,30 @@
-﻿using TransfersModule.Contract;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using MediatR;
+using TransfersModule.Contract;
 using TransfersModule.Persistence;
 
 namespace TransfersModule.Queries
 {
-    internal class GetTransferByIdQuery
+    internal class GetTransferByIdQuery : IRequestHandler<GetTransferByIdContract.Request, GetTransferByIdContract.Response>
     {
-        private readonly AppDbContext _db;
+        private readonly TransfersDbContext _db;
 
-        public GetTransferByIdQuery(AppDbContext db)
+        public GetTransferByIdQuery(TransfersDbContext db)
         {
             _db = db;
         }
 
-        public GetTransferByIdResponse Handle(GetTransferByIdRequest request)
+        public async Task<GetTransferByIdContract.Response> Handle(GetTransferByIdContract.Request request, CancellationToken ct)
         {
-            var transfer = _db.Transfers.Find(request.Id);
+            var transfer = await _db.Transfers.FindAsync(request.Id);
 
             return Map(transfer);
         }
 
-        private static GetTransferByIdResponse Map(Transfer transfer)
+        private static GetTransferByIdContract.Response Map(Transfer transfer)
         {
-            return new GetTransferByIdResponse
+            return new GetTransferByIdContract.Response
             {
                 Id = transfer.Id,
                 EngagingClubId = transfer.EngagingClubId,

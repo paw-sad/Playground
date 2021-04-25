@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PublicApi\PublicApi.csproj" />
+    <ProjectReference Include="..\TransfersModule\TransfersModule.csproj" />
     <ProjectReference Include="..\UsersService\UsersService.csproj" />
   </ItemGroup>
 

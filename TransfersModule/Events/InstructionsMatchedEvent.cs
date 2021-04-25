@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TransfersModule.Commands
+namespace TransfersModule.Events
 {
     internal class InstructionsMatchedEvent
     {

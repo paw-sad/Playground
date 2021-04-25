@@ -4,12 +4,12 @@ namespace PublicApi
 {
     public class AuthorizationService
     {
-        public static bool CanExecuteCommand(GetUserByIdResponse user, TransfersModule.Contract.EngageWithoutTransferAgreementRequest command)
+        public static bool CanExecuteCommand(GetUserByIdResponse user, TransfersModule.Contract.EngageWithoutTransferAgreementContract.Request command)
         {
             return user.ClubId == command.EngagingClubId;
         }
 
-        public static bool CanExecuteCommand(GetUserByIdResponse user, TransfersModule.Contract.ReleasePlayerRequest command)
+        public static bool CanExecuteCommand(GetUserByIdResponse user, TransfersModule.Contract.ReleasePlayerContract.Request command)
         {
             return user.ClubId == command.ReleasingClubId;
         }

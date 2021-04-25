@@ -1,5 +1,6 @@
 ﻿using System;
 using PublicApi.Contract;
+using TransfersModule;
 using UsersService.Contract;
 using LogInRequest = PublicApi.Contract.LogInRequest;
 
@@ -28,13 +29,11 @@ namespace PublicApi
                 UserId = _currentUserId.Value
             });
 
-            var command = new TransfersModule.Contract.EngageWithoutTransferAgreementRequest
+            var command = new TransfersModule.Contract.EngageWithoutTransferAgreementContract.Request
             {
-                PaymentsAmount = request.PaymentsAmount,
                 ReleasingClubId = request.ReleasingClubId,
                 PlayerId = request.PlayerId,
                 EngagingClubId = request.EngagingClubId,
-                TransferDate = request.TransferDate
             };
 
             if (!AuthorizationService.CanExecuteCommand(currentUser, command))
@@ -42,7 +41,7 @@ namespace PublicApi
                 throw new InvalidOperationException("You can only engage players for your own club");
             }
 
-            var response = TransfersModule.Api.EngageWithoutTransferAgreement(command);
+            var response = new TransfersApi().Execute(command).Result;
 
             return new EngageWithoutTransferAgreementResponse
             {
@@ -62,7 +61,7 @@ namespace PublicApi
                 UserId = _currentUserId.Value
             });
 
-            var command = new TransfersModule.Contract.ReleasePlayerRequest()
+            var command = new TransfersModule.Contract.ReleasePlayerContract.Request()
             {
                 ReleasingClubId = request.ReleasingClubId,
                 EngagingClubId = request.EngagingClubId,
@@ -76,7 +75,7 @@ namespace PublicApi
                 throw new InvalidOperationException("You can only release players only from your own club");
             }
 
-            var response = TransfersModule.Api.ReleasePlayer(command);
+            var response = new TransfersApi().Execute(command).Result;
 
             return new ReleasePlayerResponse
             {

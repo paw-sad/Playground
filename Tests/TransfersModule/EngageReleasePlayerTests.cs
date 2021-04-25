@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TransfersModule;
@@ -11,19 +12,21 @@ namespace Tests.TransfersModule
     [TestClass]
     public class EngageReleasePlayerTests
     {
+        private readonly TransfersApi _api = new TransfersApi();
+
         [TestInitialize]
-        public void Setup()
+        public async Task Setup()
         {
             var db = new TestDbContext();
-            db.Database.ExecuteSqlRaw("DELETE TransferInstructions");
-            db.Database.ExecuteSqlRaw("DELETE Transfers");
+            await db.Database.ExecuteSqlRawAsync("DELETE TransferInstructions");
+            await db.Database.ExecuteSqlRawAsync("DELETE Transfers");
         }
 
         [TestMethod]
-        public void CanEngageWithTransferAgreement()
+        public async Task CanEngageWithTransferAgreement()
         {
             // given new request with payments equal 0
-            var request = new EngageWithTransferAgreementRequest
+            var request = new EngageWithTransferAgreementContract.Request
             {
                 ReleasingClubId = 1,
                 EngagingClubId = 2,
@@ -33,10 +36,10 @@ namespace Tests.TransfersModule
             };
 
             // when calling engage
-            var response = Api.EngageWithTransferAgreement(request);
+            var response = await _api.Execute(request);
 
             // then i should get new engaging transfer instruction
-            var transferInstruction = Api.GetTransferInstructionById(new GetTransferInstructionByIdRequest
+            var transferInstruction = await _api.Execute(new GetTransferInstructionByIdContract.Request
             {
                 Id = response.TransferInstructionId
             });
@@ -45,10 +48,10 @@ namespace Tests.TransfersModule
         }
 
         [TestMethod]
-        public void CanReleaseWithTransferAgreement()
+        public async Task CanReleaseWithTransferAgreement()
         {
             // given new request with payments equal 0
-            var request = new ReleasePlayerRequest
+            var request = new ReleasePlayerContract.Request
             {
                 ReleasingClubId = 1,
                 EngagingClubId = 2,
@@ -58,10 +61,10 @@ namespace Tests.TransfersModule
             };
 
             // when calling engage
-            var response = Api.ReleasePlayer(request);
+            var response = await _api.Execute(request);
 
             // then i should get new engaging transfer instruction
-            var transferInstruction = Api.GetTransferInstructionById(new GetTransferInstructionByIdRequest
+            var transferInstruction = await _api.Execute(new GetTransferInstructionByIdContract.Request
             {
                 Id = response.TransferInstructionId
             });
@@ -70,9 +73,9 @@ namespace Tests.TransfersModule
         }
 
         [TestMethod]
-        public void CanPairReleasingInstructionAndCreateTransfer()
+        public async Task CanPairReleasingInstructionAndCreateTransfer()
         {
-            var engageRequest = new EngageWithTransferAgreementRequest
+            var engageRequest = new EngageWithTransferAgreementContract.Request
             {
                 ReleasingClubId = 1,
                 EngagingClubId = 2,
@@ -81,8 +84,8 @@ namespace Tests.TransfersModule
                 TransferDate = new DateTime(2020, 01, 01)
             };
 
-            var engageResponse = Api.EngageWithTransferAgreement(engageRequest);
-            var releaseRequest = new ReleasePlayerRequest
+            var engageResponse = await _api.Execute(engageRequest);
+            var releaseRequest = new ReleasePlayerContract.Request
             {
                 ReleasingClubId = 1,
                 EngagingClubId = 2,
@@ -90,15 +93,15 @@ namespace Tests.TransfersModule
                 PaymentsAmount = 0,
                 TransferDate = new DateTime(2020, 01, 01)
             };
-            var releaseResponse = Api.ReleasePlayer(releaseRequest);
+            var releaseResponse = await _api.Execute(releaseRequest);
 
-            var engageInstruction = Api.GetTransferInstructionById(new GetTransferInstructionByIdRequest
+            var engageInstruction = await _api.Execute(new GetTransferInstructionByIdContract.Request
             {
                 Id = engageResponse.TransferInstructionId
             });
             engageInstruction.TransferId.ShouldNotBeNull();
 
-            var releaseInstruction = Api.GetTransferInstructionById(new GetTransferInstructionByIdRequest
+            var releaseInstruction = await _api.Execute(new GetTransferInstructionByIdContract.Request
             {
                 Id = releaseResponse.TransferInstructionId
             });
@@ -107,9 +110,9 @@ namespace Tests.TransfersModule
         }
 
         [TestMethod]
-        public void CanPairEngagingInstructionAndCreateTransfer()
+        public async Task CanPairEngagingInstructionAndCreateTransfer()
         {
-            var releaseRequest = new ReleasePlayerRequest
+            var releaseRequest = new ReleasePlayerContract.Request
             {
                 ReleasingClubId = 1,
                 EngagingClubId = 2,
@@ -117,10 +120,10 @@ namespace Tests.TransfersModule
                 PaymentsAmount = 0,
                 TransferDate = new DateTime(2020, 01, 01)
             };
-            var releaseResponse = Api.ReleasePlayer(releaseRequest);
+            var releaseResponse = await _api.Execute(releaseRequest);
 
             // given new request with payments equal 0
-            var engageRequest = new EngageWithTransferAgreementRequest
+            var engageRequest = new EngageWithTransferAgreementContract.Request
             {
                 ReleasingClubId = 1,
                 EngagingClubId = 2,
@@ -129,15 +132,15 @@ namespace Tests.TransfersModule
                 TransferDate = new DateTime(2020, 01, 01)
             };
 
-            var engageResponse = Api.EngageWithTransferAgreement(engageRequest);
+            var engageResponse = await _api.Execute(engageRequest);
 
-            var engageInstruction = Api.GetTransferInstructionById(new GetTransferInstructionByIdRequest
+            var engageInstruction = await _api.Execute(new GetTransferInstructionByIdContract.Request
             {
                 Id = engageResponse.TransferInstructionId
             });
             engageInstruction.TransferId.ShouldNotBeNull();
 
-            var releaseInstruction = Api.GetTransferInstructionById(new GetTransferInstructionByIdRequest
+            var releaseInstruction = await _api.Execute(new GetTransferInstructionByIdContract.Request
             {
                 Id = releaseResponse.TransferInstructionId
             });
@@ -146,9 +149,9 @@ namespace Tests.TransfersModule
         }
 
         [TestMethod]
-        public void DontPairTwoEngagingInstructions()
+        public async Task DontPairTwoEngagingInstructions()
         {
-            var engageRequest = new EngageWithTransferAgreementRequest
+            var engageRequest = new EngageWithTransferAgreementContract.Request
             {
                 ReleasingClubId = 1,
                 EngagingClubId = 2,
@@ -157,16 +160,16 @@ namespace Tests.TransfersModule
                 TransferDate = new DateTime(2020, 01, 01)
             };
 
-            var engageResponse1 = Api.EngageWithTransferAgreement(engageRequest);
+            var engageResponse1 = await _api.Execute(engageRequest);
 
-            var engageInstruction1 = Api.GetTransferInstructionById(new GetTransferInstructionByIdRequest
+            var engageInstruction1 = await _api.Execute(new GetTransferInstructionByIdContract.Request
             {
                 Id = engageResponse1.TransferInstructionId
             });
 
-            var engageResponse2 = Api.EngageWithTransferAgreement(engageRequest);
+            var engageResponse2 = await _api.Execute(engageRequest);
 
-            var engageInstruction2 = Api.GetTransferInstructionById(new GetTransferInstructionByIdRequest
+            var engageInstruction2 = await _api.Execute(new GetTransferInstructionByIdContract.Request
             {
                 Id = engageResponse2.TransferInstructionId
             });
@@ -176,9 +179,9 @@ namespace Tests.TransfersModule
         }
 
         [TestMethod]
-        public void WhenMoreEngagingInstructionsAreAvailableShouldPairWithOldest()
+        public async Task WhenMoreEngagingInstructionsAreAvailableShouldPairWithOldest()
         {
-            var engageRequest = new EngageWithTransferAgreementRequest
+            var engageRequest = new EngageWithTransferAgreementContract.Request
             {
                 ReleasingClubId = 1,
                 EngagingClubId = 2,
@@ -187,11 +190,11 @@ namespace Tests.TransfersModule
                 TransferDate = new DateTime(2020, 01, 01)
             };
 
-            var engageResponse1 = Api.EngageWithTransferAgreement(engageRequest);
+            var engageResponse1 = await _api.Execute(engageRequest);
 
-            var engageResponse2 = Api.EngageWithTransferAgreement(engageRequest);
+            var engageResponse2 = await _api.Execute(engageRequest);
 
-            var releaseRequest = new ReleasePlayerRequest
+            var releaseRequest = new ReleasePlayerContract.Request
             {
                 ReleasingClubId = 1,
                 EngagingClubId = 2,
@@ -199,19 +202,19 @@ namespace Tests.TransfersModule
                 PaymentsAmount = 0,
                 TransferDate = new DateTime(2020, 01, 01)
             };
-            var releaseResponse = Api.ReleasePlayer(releaseRequest);
+            var releaseResponse = await _api.Execute(releaseRequest);
 
-            var engageInstruction1 = Api.GetTransferInstructionById(new GetTransferInstructionByIdRequest
+            var engageInstruction1 = await _api.Execute(new GetTransferInstructionByIdContract.Request
             {
                 Id = engageResponse1.TransferInstructionId
             });
 
-            var engageInstruction2 = Api.GetTransferInstructionById(new GetTransferInstructionByIdRequest
+            var engageInstruction2 = await _api.Execute(new GetTransferInstructionByIdContract.Request
             {
                 Id = engageResponse2.TransferInstructionId
             });
 
-            var releaseInstruction = Api.GetTransferInstructionById(new GetTransferInstructionByIdRequest
+            var releaseInstruction = await _api.Execute(new GetTransferInstructionByIdContract.Request
             {
                 Id = releaseResponse.TransferInstructionId
             });
@@ -222,9 +225,10 @@ namespace Tests.TransfersModule
         }
 
         [TestMethod]
-        public void WhenMoreReleasingInstructionsAreAvailableShouldPairWithOldest()
+        public async Task WhenMoreReleasingInstructionsAreAvailableShouldPairWithOldest()
         {
-            var releaseRequest = new ReleasePlayerRequest
+
+            var releaseRequest = new ReleasePlayerContract.Request
             {
                 ReleasingClubId = 1,
                 EngagingClubId = 2,
@@ -232,9 +236,9 @@ namespace Tests.TransfersModule
                 PaymentsAmount = 0,
                 TransferDate = new DateTime(2020, 01, 01)
             };
-            var releaseResponse1 = Api.ReleasePlayer(releaseRequest);
-            var releaseResponse2 = Api.ReleasePlayer(releaseRequest);
-            var engageRequest = new EngageWithTransferAgreementRequest
+            var releaseResponse1 = await _api.Execute(releaseRequest);
+            var releaseResponse2 = await _api.Execute(releaseRequest);
+            var engageRequest = new EngageWithTransferAgreementContract.Request
             {
                 ReleasingClubId = 1,
                 EngagingClubId = 2,
@@ -243,17 +247,17 @@ namespace Tests.TransfersModule
                 TransferDate = new DateTime(2020, 01, 01)
             };
 
-            var engageResponse = Api.EngageWithTransferAgreement(engageRequest);
-            var engageInstruction = Api.GetTransferInstructionById(new GetTransferInstructionByIdRequest
+            var engageResponse = await _api.Execute(engageRequest);
+            var engageInstruction = await _api.Execute(new GetTransferInstructionByIdContract.Request
             {
                 Id = engageResponse.TransferInstructionId
             });
 
-            var releaseInstruction1 = Api.GetTransferInstructionById(new GetTransferInstructionByIdRequest
+            var releaseInstruction1 = await _api.Execute(new GetTransferInstructionByIdContract.Request
             {
                 Id = releaseResponse1.TransferInstructionId
             });
-            var releaseInstruction2 = Api.GetTransferInstructionById(new GetTransferInstructionByIdRequest
+            var releaseInstruction2 = await _api.Execute(new GetTransferInstructionByIdContract.Request
             {
                 Id = releaseResponse2.TransferInstructionId
             });

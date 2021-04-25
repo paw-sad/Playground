@@ -2,10 +2,17 @@
 
 namespace TransfersModule.Persistence
 {
-    internal class AppDbContext : DbContext
+    internal class TransfersDbContext : DbContext
     {
+        private readonly string _connectionString;
+
+        public TransfersDbContext(string connectionString)
+        {
+            _connectionString = connectionString;
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder options)
-            => options.UseSqlServer("Data Source=localhost;Initial Catalog=Playground;Integrated Security=True");
+            => options.UseSqlServer(_connectionString);
 
         public DbSet<Transfer> Transfers { get; set; }
         public DbSet<TransferInstruction> TransferInstructions { get; set; }

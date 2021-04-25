@@ -13,11 +13,11 @@ namespace Tests.PublicApiTests
         [TestMethod]
         public void CanEngagePlayerForMyOwnClub()
         {
-            var userService = new UsersService.Api(); 
+            var userService = new UsersService.Api();
             var juventusClubId = 1;
             var someOtherClub = 2;
 
-               userService.RegisterUser(new RegisterUserRequest
+            userService.RegisterUser(new RegisterUserRequest
             {
                 ClubId = juventusClubId,
                 Password = "1234",
@@ -38,8 +38,8 @@ namespace Tests.PublicApiTests
                 PlayerId = 1,
                 ReleasingClubId = someOtherClub,
             });
-        } 
-        
+        }
+
         [TestMethod]
         public void CantEngagePlayerNotForMyClub()
         {
@@ -63,12 +63,12 @@ namespace Tests.PublicApiTests
 
             Should.Throw<Exception>(() => api
                 .EngagePlayerWithoutTransferAgreement(new EngageWithoutTransferAgreementRequest
-            {
-                EngagingClubId = someOtherClub,
-                PaymentsAmount = 0,
-                PlayerId = 1,
-                ReleasingClubId = juventusClubId,
-            }));
+                {
+                    EngagingClubId = someOtherClub,
+                    PaymentsAmount = 0,
+                    PlayerId = 1,
+                    ReleasingClubId = juventusClubId,
+                }));
         }
     }
 }

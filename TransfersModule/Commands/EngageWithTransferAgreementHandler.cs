@@ -1,25 +1,28 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using MediatR;
 using TransfersModule.Contract;
 using TransfersModule.Events;
 using TransfersModule.Persistence;
 
 namespace TransfersModule.Commands
 {
-    internal class EngageWithTransferAgreementHandler
+    internal class EngageWithTransferAgreementHandler : IRequestHandler<EngageWithTransferAgreementContract.Request, EngageWithTransferAgreementContract.Response>
     {
         private readonly TransferInstructionRepository _transferInstructionRepository;
         private readonly TransferRepository _transferRepository;
-        private readonly AppDbContext _db;
+        private readonly TransfersDbContext _db;
 
-        public EngageWithTransferAgreementHandler(TransferInstructionRepository transferInstructionRepository, TransferRepository transferRepository, AppDbContext db)
+        public EngageWithTransferAgreementHandler(TransferInstructionRepository transferInstructionRepository, TransferRepository transferRepository, TransfersDbContext db)
         {
             _transferInstructionRepository = transferInstructionRepository;
             _transferRepository = transferRepository;
             _db = db;
         }
 
-        public EngageWithTransferAgreementResponse Handle(EngageWithTransferAgreementRequest request)
+        public async Task<EngageWithTransferAgreementContract.Response> Handle(EngageWithTransferAgreementContract.Request request, CancellationToken ct)
         {
             var e = Map(request);
             var transferInstructionId = _transferInstructionRepository.Persist(e);
@@ -47,13 +50,13 @@ namespace TransfersModule.Commands
 
                 _transferRepository.Persist(transferCreatedEvent);
             }
-            return new EngageWithTransferAgreementResponse
+            return new EngageWithTransferAgreementContract.Response
             {
                 TransferInstructionId = transferInstructionId
             };
         }
 
-        private EngageWithTransferAgreementInstructionCreatedEvent Map(EngageWithTransferAgreementRequest request)
+        private EngageWithTransferAgreementInstructionCreatedEvent Map(EngageWithTransferAgreementContract.Request request)
         {
             return new EngageWithTransferAgreementInstructionCreatedEvent
             {
@@ -65,7 +68,7 @@ namespace TransfersModule.Commands
             };
         }
 
-        private InstructionsMatchedEvent Map(EngageWithTransferAgreementRequest request, Guid engagingInstructionId, Guid releasingInstructionId)
+        private InstructionsMatchedEvent Map(EngageWithTransferAgreementContract.Request request, Guid engagingInstructionId, Guid releasingInstructionId)
         {
             return new InstructionsMatchedEvent
             {
@@ -75,18 +78,6 @@ namespace TransfersModule.Commands
                 ReleasingClubId = request.ReleasingClubId,
                 PaymentsAmount = request.PaymentsAmount,
                 PlayerId = request.PlayerId,
-                TransferDate = request.TransferDate
-            };
-        }
-
-        private ReleasePlayerInstructionCreatedEvent Map(ReleasePlayerRequest request)
-        {
-            return new ReleasePlayerInstructionCreatedEvent
-            {
-                EngagingClubId = request.EngagingClubId,
-                ReleasingClubId = request.ReleasingClubId,
-                PlayerId = request.PlayerId,
-                PaymentsAmount = request.PaymentsAmount,
                 TransferDate = request.TransferDate
             };
         }

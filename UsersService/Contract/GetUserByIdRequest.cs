@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace UsersService.Contract
+﻿namespace UsersService.Contract
 {
     public class GetUserByIdRequest
     {
