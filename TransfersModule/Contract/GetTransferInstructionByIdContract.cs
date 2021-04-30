@@ -20,7 +20,6 @@ namespace TransfersModule.Contract
             public decimal PaymentsAmount { get; set; }
             public DateTime TransferDate { get; set; }
             public TransferInstructionType Type { get; set; }
-            public Guid? TransferId { get; set; }
         }
     }
 }

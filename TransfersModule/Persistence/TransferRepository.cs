@@ -1,28 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using MongoDB.Driver;
 using TransfersModule.Events;
 
 namespace TransfersModule.Persistence
 {
     internal class TransferRepository
     {
-        private readonly TransfersDbContext _db;
-        public TransferRepository(TransfersDbContext db)
+        private readonly IMongoDatabase _db;
+        private IMongoCollection<Transfer> _transfers => _db.GetCollection<Transfer>("transfers");
+        private IMongoCollection<TransferInstruction> _transferInstructions => _db.GetCollection<TransferInstruction>("transfer-instructions");
+
+        public TransferRepository(IMongoDatabase db)
         {
             _db = db;
         }
 
+        public IMongoCollection<Transfer> Query() => _transfers;
+
         public Guid Persist(TransferCreatedEvent transferCreatedEvent)
         {
             var transfer = Map(transferCreatedEvent);
-            _db.Transfers.Add(transfer);
+            _transfers.InsertOne(transfer);
 
             return transfer.Id;
         }
 
         private Transfer Map(TransferCreatedEvent e)
-        {
-            return new Transfer
+            => new Transfer
             {
                 Id = Guid.NewGuid(),
                 ReleasingClubId = e.ReleasingClubId,
@@ -32,29 +39,26 @@ namespace TransfersModule.Persistence
                 State = TransferState.Confirmed,
                 TransferDate = e.TransferDate
             };
-        }
 
-        public void Persist(TransferCompletedEvent e)
-        {
-            var transfer = _db.Transfers.Find(e.TransferId);
-            transfer.State = TransferState.Completed;
-        }
+        public async Task Persist(TransferCompletedEvent e, CancellationToken ct)
+            => await _transfers.UpdateOneAsync(x => x.Id == e.TransferId, Builders<Transfer>
+                .Update.Set(x => x.State, TransferState.Completed), cancellationToken: ct);
 
-        public Guid Persist(InstructionsMatchedEvent instructionsMatchedEvent)
+        public async Task<Guid> Persist(InstructionsMatchedEvent instructionsMatchedEvent, CancellationToken ct)
         {
             var transfer = Map(instructionsMatchedEvent);
-            var engagingInstruction = _db.TransferInstructions.Find(instructionsMatchedEvent.EngagingInstructionId);
-            var releasingInstruction = _db.TransferInstructions.Find(instructionsMatchedEvent.ReleasingInstructionId);
-            transfer.TransferInstructions.Add(engagingInstruction);
-            transfer.TransferInstructions.Add(releasingInstruction);
-            _db.Transfers.Add(transfer);
+            using var session = await _db.Client.StartSessionAsync(null, ct);
+
+            await _transferInstructions.DeleteManyAsync(x =>
+                x.Id == instructionsMatchedEvent.ReleasingInstructionId
+                || x.Id == instructionsMatchedEvent.EngagingInstructionId, ct);
+            await _transfers.InsertOneAsync(transfer, null, ct);
 
             return transfer.Id;
         }
 
         private Transfer Map(InstructionsMatchedEvent instructionsMatchedEvent)
-        {
-            var transfer = new Transfer
+            => new Transfer
             {
                 EngagingClubId = instructionsMatchedEvent.EngagingClubId,
                 ReleasingClubId = instructionsMatchedEvent.ReleasingClubId,
@@ -63,8 +67,5 @@ namespace TransfersModule.Persistence
                 TransferDate = instructionsMatchedEvent.TransferDate,
                 TransferInstructions = new List<TransferInstruction>()
             };
-
-            return transfer;
-        }
     }
 }

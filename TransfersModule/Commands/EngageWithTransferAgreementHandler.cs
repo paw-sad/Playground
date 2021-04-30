@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -13,46 +12,39 @@ namespace TransfersModule.Commands
     {
         private readonly TransferInstructionRepository _transferInstructionRepository;
         private readonly TransferRepository _transferRepository;
-        private readonly TransfersDbContext _db;
 
         public EngageWithTransferAgreementHandler(TransferInstructionRepository transferInstructionRepository, TransferRepository transferRepository, TransfersDbContext db)
         {
             _transferInstructionRepository = transferInstructionRepository;
             _transferRepository = transferRepository;
-            _db = db;
         }
 
         public async Task<EngageWithTransferAgreementContract.Response> Handle(EngageWithTransferAgreementContract.Request request, CancellationToken ct)
         {
             var e = Map(request);
-            var transferInstructionId = _transferInstructionRepository.Persist(e);
+            var transferInstructionId = await _transferInstructionRepository.Persist(e, ct);
 
-            var matchingInstruction = _db.TransferInstructions
-                .FirstOrDefault(i =>
-                    i.EngagingClubId == e.EngagingClubId
-                    && i.ReleasingClubId == e.ReleasingClubId
-                    && i.PlayerId == e.PlayerId && i.Type == TransferInstructionType.Releasing
-                    && i.TransferId == null);
+            var matchingTransferInstructionId = await _transferInstructionRepository.FindMatchingTransferInstructionId(e, ct);
 
-            if (matchingInstruction != null)
+            if (matchingTransferInstructionId == Guid.Empty)
             {
-                var instructionsMatchedEvent = Map(request, transferInstructionId, matchingInstruction.Id);
-                _transferRepository.Persist(instructionsMatchedEvent);
-
-                var transferCreatedEvent = new TransferCreatedEvent
+                return new EngageWithTransferAgreementContract.Response
                 {
-                    EngagingClubId = request.EngagingClubId,
-                    ReleasingClubId = request.ReleasingClubId,
-                    PaymentsAmount = request.PaymentsAmount,
-                    PlayerId = request.PlayerId,
-                    TransferDate = request.TransferDate
+                    TransferInstructionId = transferInstructionId
                 };
-
-                _transferRepository.Persist(transferCreatedEvent);
             }
+
+            var instructionsMatchedEvent = Map(
+                request,
+                transferInstructionId,
+                matchingTransferInstructionId);
+
+            var transferId = await _transferRepository
+                                    .Persist(instructionsMatchedEvent, ct);
+
             return new EngageWithTransferAgreementContract.Response
             {
-                TransferInstructionId = transferInstructionId
+                TransferId = transferId
             };
         }
 

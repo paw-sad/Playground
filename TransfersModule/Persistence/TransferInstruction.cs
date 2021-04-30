@@ -12,8 +12,5 @@ namespace TransfersModule.Persistence
         public DateTime TransferDate { get; set; }
         public TransferInstructionType Type { get; set; }
         public DateTime CreatedOn { get; set; }
-
-        public Guid? TransferId { get; set; }
-        public virtual Transfer Transfer { get; set; }
     }
 }

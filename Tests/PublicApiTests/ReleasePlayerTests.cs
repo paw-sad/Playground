@@ -58,13 +58,13 @@ namespace Tests.PublicApiTests
             });
 
             Should.Throw<Exception>(() => api
-                .EngagePlayerWithoutTransferAgreement(new EngageWithoutTransferAgreementRequest
-                {
-                    EngagingClubId = juventusClubId + 1,
-                    PaymentsAmount = 0,
-                    PlayerId = 1,
-                    ReleasingClubId = 2,
-                }));
+            .EngagePlayerWithoutTransferAgreement(new EngageWithoutTransferAgreementRequest
+            {
+                EngagingClubId = juventusClubId + 1,
+                PaymentsAmount = 0,
+                PlayerId = 1,
+                ReleasingClubId = 2
+            }));
         }
     }
 }

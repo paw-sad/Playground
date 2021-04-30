@@ -6,13 +6,23 @@ namespace TransfersModule.Contract
 {
     public class EngageWithoutTransferAgreementContract
     {
-        public class Request : IRequest<Response>
+        public class Request: IRequest<Response>
         {
             public int EngagingClubId { get; set; }
             public int ReleasingClubId { get; set; }
             public int PlayerId { get; set; }
-            public PlayersContract PlayersContract { get; set; }
+            public DateTime TransferDate { get; set; }
+            public decimal PaymentsAmount { get; set; }
         }
+
+
+    //public class Request : IRequest<Response>
+//    {
+//        public int EngagingClubId { get; set; }
+//        public int ReleasingClubId { get; set; }
+//        public int PlayerId { get; set; }
+//        public PlayersContract PlayersContract { get; set; }
+//    }
 
         public class PlayersContract
         {

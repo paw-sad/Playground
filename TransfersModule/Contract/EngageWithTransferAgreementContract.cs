@@ -16,7 +16,8 @@ namespace TransfersModule.Contract
 
         public class Response
         {
-            public Guid TransferInstructionId { get; set; }
+            public Guid? TransferInstructionId { get; set; }
+            public Guid? TransferId { get; set; }
         }
     }
 }

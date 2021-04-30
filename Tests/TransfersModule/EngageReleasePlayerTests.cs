@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MongoDB.Driver;
 using TransfersModule;
 using TransfersModule.Contract;
 using TransfersModule.Persistence;
@@ -17,9 +18,9 @@ namespace Tests.TransfersModule
         [TestInitialize]
         public async Task Setup()
         {
-            var db = new TestDbContext();
-            await db.Database.ExecuteSqlRawAsync("DELETE TransferInstructions");
-            await db.Database.ExecuteSqlRawAsync("DELETE Transfers");
+            var db = new MongoClient("mongodb://localhost:27017");
+            await db.GetDatabase("transfers-module").DropCollectionAsync("transfers");
+            await db.GetDatabase("transfers-module").DropCollectionAsync("transfer-instructions");
         }
 
         [TestMethod]
@@ -41,7 +42,7 @@ namespace Tests.TransfersModule
             // then i should get new engaging transfer instruction
             var transferInstruction = await _api.Execute(new GetTransferInstructionByIdContract.Request
             {
-                Id = response.TransferInstructionId
+                Id = response.TransferInstructionId.Value
             });
 
             transferInstruction.Type.ShouldBe(TransferInstructionType.Engaging);
@@ -66,7 +67,7 @@ namespace Tests.TransfersModule
             // then i should get new engaging transfer instruction
             var transferInstruction = await _api.Execute(new GetTransferInstructionByIdContract.Request
             {
-                Id = response.TransferInstructionId
+                Id = response.TransferInstructionId.Value
             });
 
             transferInstruction.Type.ShouldBe(TransferInstructionType.Releasing);
@@ -84,7 +85,7 @@ namespace Tests.TransfersModule
                 TransferDate = new DateTime(2020, 01, 01)
             };
 
-            var engageResponse = await _api.Execute(engageRequest);
+            await _api.Execute(engageRequest);
             var releaseRequest = new ReleasePlayerContract.Request
             {
                 ReleasingClubId = 1,
@@ -94,19 +95,7 @@ namespace Tests.TransfersModule
                 TransferDate = new DateTime(2020, 01, 01)
             };
             var releaseResponse = await _api.Execute(releaseRequest);
-
-            var engageInstruction = await _api.Execute(new GetTransferInstructionByIdContract.Request
-            {
-                Id = engageResponse.TransferInstructionId
-            });
-            engageInstruction.TransferId.ShouldNotBeNull();
-
-            var releaseInstruction = await _api.Execute(new GetTransferInstructionByIdContract.Request
-            {
-                Id = releaseResponse.TransferInstructionId
-            });
-
-            releaseInstruction.TransferId.ShouldNotBeNull();
+            releaseResponse.TransferId.ShouldNotBeNull();
         }
 
         [TestMethod]
@@ -133,19 +122,9 @@ namespace Tests.TransfersModule
             };
 
             var engageResponse = await _api.Execute(engageRequest);
+            engageResponse.TransferId.ShouldNotBeNull();
 
-            var engageInstruction = await _api.Execute(new GetTransferInstructionByIdContract.Request
-            {
-                Id = engageResponse.TransferInstructionId
-            });
-            engageInstruction.TransferId.ShouldNotBeNull();
-
-            var releaseInstruction = await _api.Execute(new GetTransferInstructionByIdContract.Request
-            {
-                Id = releaseResponse.TransferInstructionId
-            });
-
-            releaseInstruction.TransferId.ShouldNotBeNull();
+            engageResponse.TransferInstructionId.ShouldBeNull();
         }
 
         [TestMethod]
@@ -164,18 +143,19 @@ namespace Tests.TransfersModule
 
             var engageInstruction1 = await _api.Execute(new GetTransferInstructionByIdContract.Request
             {
-                Id = engageResponse1.TransferInstructionId
+                Id = engageResponse1.TransferInstructionId.Value
             });
 
             var engageResponse2 = await _api.Execute(engageRequest);
 
             var engageInstruction2 = await _api.Execute(new GetTransferInstructionByIdContract.Request
             {
-                Id = engageResponse2.TransferInstructionId
+                Id = engageResponse2.TransferInstructionId.Value
             });
-
-            engageInstruction1.TransferId.ShouldBeNull();
-            engageInstruction2.TransferId.ShouldBeNull();
+            engageInstruction1.ShouldNotBeNull();
+            engageInstruction2.ShouldNotBeNull();
+            engageResponse1.TransferId.ShouldBeNull();
+            engageResponse2.TransferId.ShouldBeNull();
         }
 
         [TestMethod]
@@ -202,32 +182,32 @@ namespace Tests.TransfersModule
                 PaymentsAmount = 0,
                 TransferDate = new DateTime(2020, 01, 01)
             };
+
             var releaseResponse = await _api.Execute(releaseRequest);
 
             var engageInstruction1 = await _api.Execute(new GetTransferInstructionByIdContract.Request
             {
-                Id = engageResponse1.TransferInstructionId
+                Id = engageResponse1.TransferInstructionId.Value
             });
 
             var engageInstruction2 = await _api.Execute(new GetTransferInstructionByIdContract.Request
             {
-                Id = engageResponse2.TransferInstructionId
+                Id = engageResponse2.TransferInstructionId.Value
             });
 
-            var releaseInstruction = await _api.Execute(new GetTransferInstructionByIdContract.Request
-            {
-                Id = releaseResponse.TransferInstructionId
-            });
+        
+            releaseResponse.TransferId.ShouldNotBeNull();
+            releaseResponse.TransferInstructionId.ShouldBeNull();
+            engageInstruction1.ShouldBeNull();
+            engageInstruction2.ShouldNotBeNull();
 
-            engageInstruction1.TransferId.ShouldNotBeNull();
-            engageInstruction2.TransferId.ShouldBeNull();
-            releaseInstruction.TransferId.ShouldNotBeNull();
+            releaseResponse.TransferInstructionId.ShouldBeNull();
+            releaseResponse.TransferId.ShouldNotBeNull();
         }
 
         [TestMethod]
         public async Task WhenMoreReleasingInstructionsAreAvailableShouldPairWithOldest()
         {
-
             var releaseRequest = new ReleasePlayerContract.Request
             {
                 ReleasingClubId = 1,
@@ -238,6 +218,7 @@ namespace Tests.TransfersModule
             };
             var releaseResponse1 = await _api.Execute(releaseRequest);
             var releaseResponse2 = await _api.Execute(releaseRequest);
+
             var engageRequest = new EngageWithTransferAgreementContract.Request
             {
                 ReleasingClubId = 1,
@@ -248,23 +229,22 @@ namespace Tests.TransfersModule
             };
 
             var engageResponse = await _api.Execute(engageRequest);
-            var engageInstruction = await _api.Execute(new GetTransferInstructionByIdContract.Request
-            {
-                Id = engageResponse.TransferInstructionId
-            });
+      
 
             var releaseInstruction1 = await _api.Execute(new GetTransferInstructionByIdContract.Request
             {
-                Id = releaseResponse1.TransferInstructionId
+                Id = releaseResponse1.TransferInstructionId.Value
             });
             var releaseInstruction2 = await _api.Execute(new GetTransferInstructionByIdContract.Request
             {
-                Id = releaseResponse2.TransferInstructionId
+                Id = releaseResponse2.TransferInstructionId.Value
             });
 
-            releaseInstruction1.TransferId.ShouldNotBeNull();
-            releaseInstruction2.TransferId.ShouldBeNull();
-            engageInstruction.TransferId.ShouldNotBeNull();
+            engageResponse.TransferId.ShouldNotBeNull();
+            engageResponse.TransferInstructionId.ShouldBeNull();
+
+            releaseInstruction1.ShouldBeNull();
+            releaseInstruction2.ShouldNotBeNull();
         }
     }
 }

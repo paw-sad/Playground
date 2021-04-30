@@ -14,5 +14,7 @@ namespace TransfersModule.Persistence
         public TransferState State { get; set; }
 
         public virtual ICollection<TransferInstruction> TransferInstructions { get; set; }
+        public TransferType Type { get; internal set; }
+        public DateTime CreatedOn { get; internal set; }
     }
 }

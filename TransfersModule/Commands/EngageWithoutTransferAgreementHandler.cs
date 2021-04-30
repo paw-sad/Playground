@@ -5,12 +5,6 @@ using TransfersModule.Contract;
 using TransfersModule.Events;
 using TransfersModule.Persistence;
 
-public interface ICommandHandler<in TCommand, TResult> :
-    IRequestHandler<TCommand, TResult>
-    where TCommand : IRequest<TResult>
-{
-}
-
 namespace TransfersModule.Commands
 {
     internal class EngageWithoutTransferAgreementHandler : IRequestHandler<EngageWithoutTransferAgreementContract.Request, EngageWithoutTransferAgreementContract.Response>
@@ -34,7 +28,7 @@ namespace TransfersModule.Commands
                     TransferId = transferId
                 };
 
-                _transferRepository.Persist(transferCompletedEvent);
+                await _transferRepository.Persist(transferCompletedEvent, ct);
             }
 
             return new EngageWithoutTransferAgreementContract.Response
@@ -52,6 +46,5 @@ namespace TransfersModule.Commands
                 PlayerId = request.PlayerId,
             };
         }
-
     }
 }

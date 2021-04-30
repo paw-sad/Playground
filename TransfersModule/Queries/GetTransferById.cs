@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using MongoDB.Driver;
 using TransfersModule.Contract;
 using TransfersModule.Persistence;
 
@@ -8,16 +9,17 @@ namespace TransfersModule.Queries
 {
     internal class GetTransferByIdQuery : IRequestHandler<GetTransferByIdContract.Request, GetTransferByIdContract.Response>
     {
-        private readonly TransfersDbContext _db;
+        private readonly TransferRepository _db;
 
-        public GetTransferByIdQuery(TransfersDbContext db)
+        public GetTransferByIdQuery(TransferRepository db)
         {
             _db = db;
         }
 
         public async Task<GetTransferByIdContract.Response> Handle(GetTransferByIdContract.Request request, CancellationToken ct)
         {
-            var transfer = await _db.Transfers.FindAsync(request.Id);
+            var filter = Builders<Transfer>.Filter.Eq(x => x.Id, request.Id);
+            var transfer = await _db.Query().Find(filter).FirstAsync(ct);
 
             return Map(transfer);
         }

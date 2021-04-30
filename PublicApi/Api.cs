@@ -79,7 +79,7 @@ namespace PublicApi
 
             return new ReleasePlayerResponse
             {
-                TransferInstructionId = response.TransferInstructionId
+                TransferInstructionId = response.TransferInstructionId.Value
             };
         }
 

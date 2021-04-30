@@ -1,21 +1,54 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using MongoDB.Driver;
 using TransfersModule.Events;
 
 namespace TransfersModule.Persistence
 {
     internal class TransferInstructionRepository
     {
-        private readonly TransfersDbContext _db;
+        private readonly IMongoCollection<TransferInstruction> _transferInstructions;
 
-        public TransferInstructionRepository(TransfersDbContext db)
+        public TransferInstructionRepository(IMongoDatabase db)
         {
-            _db = db;
+            _transferInstructions = db.GetCollection<TransferInstruction>("transfer-instructions");
         }
 
-        public Guid Persist(EngageWithTransferAgreementInstructionCreatedEvent e)
+        public IMongoCollection<TransferInstruction> Query()
+        {
+            return _transferInstructions;
+        }
+
+        public async Task<Guid> FindMatchingTransferInstructionId(
+            EngageWithTransferAgreementInstructionCreatedEvent e, CancellationToken ct)
+        {
+           return await Query()
+                .Find(i =>
+                    i.EngagingClubId == e.EngagingClubId
+                    && i.ReleasingClubId == e.ReleasingClubId
+                    && i.PlayerId == e.PlayerId && i.Type == TransferInstructionType.Releasing)
+                .Project(x => x.Id)
+                .FirstOrDefaultAsync(ct);
+        }
+
+        public async Task<Guid> FindMatchingTransferInstructionId(
+            ReleasePlayerInstructionCreatedEvent e, CancellationToken ct)
+        {
+            return await Query()
+                .Find(i =>
+                    i.EngagingClubId == e.EngagingClubId
+                    && i.ReleasingClubId == e.ReleasingClubId
+                    && i.PlayerId == e.PlayerId && i.Type == TransferInstructionType.Engaging
+                    ).Project(x => x.Id)
+                .FirstOrDefaultAsync(ct);
+        }
+
+        public async Task<Guid> Persist(
+            EngageWithTransferAgreementInstructionCreatedEvent e, CancellationToken ct)
         {
             var entity = Map(e);
-            _db.TransferInstructions.Add(entity);
+            await _transferInstructions.InsertOneAsync(entity, null, ct);
             return entity.Id;
         }
 
@@ -34,10 +67,10 @@ namespace TransfersModule.Persistence
             };
         }
 
-        public Guid Persist(ReleasePlayerInstructionCreatedEvent e)
+        public async Task<Guid> Persist(ReleasePlayerInstructionCreatedEvent e, CancellationToken ct)
         {
             var entity = Map(e);
-            _db.TransferInstructions.Add(entity);
+            await _transferInstructions.InsertOneAsync(entity, null, ct);
             return entity.Id;
         }
 

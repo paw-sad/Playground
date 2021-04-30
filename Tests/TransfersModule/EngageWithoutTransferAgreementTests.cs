@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shouldly;
 using TransfersModule;
@@ -18,7 +17,7 @@ namespace Tests.TransfersModule
             {
                 ReleasingClubId = 1,
                 EngagingClubId = 2,
-                PlayerId = 1,
+                PlayerId = 1
             };
 
             var api = new TransfersApi();
