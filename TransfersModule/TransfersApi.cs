@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Autofac;
 using MediatR;
 using MongoDB.Driver;
-using TransfersModule.Infrastructure;
 using TransfersModule.Persistence;
 
 namespace TransfersModule
@@ -40,9 +39,6 @@ namespace TransfersModule
                     .AsImplementedInterfaces();
             }
 
-            builder.Register(context => new TransfersDbContext(connectionString))
-                .As<TransfersDbContext>()
-                .InstancePerLifetimeScope();
             var mongoClient = new MongoClient(connectionStringMongo);
             var transfersDb = mongoClient.GetDatabase("transfers-module");
 

@@ -13,7 +13,7 @@ namespace TransfersModule.Commands
         private readonly TransferInstructionRepository _transferInstructionRepository;
         private readonly TransferRepository _transferRepository;
 
-        public EngageWithTransferAgreementHandler(TransferInstructionRepository transferInstructionRepository, TransferRepository transferRepository, TransfersDbContext db)
+        public EngageWithTransferAgreementHandler(TransferInstructionRepository transferInstructionRepository, TransferRepository transferRepository)
         {
             _transferInstructionRepository = transferInstructionRepository;
             _transferRepository = transferRepository;
@@ -55,8 +55,7 @@ namespace TransfersModule.Commands
                 EngagingClubId = request.EngagingClubId,
                 ReleasingClubId = request.ReleasingClubId,
                 PlayerId = request.PlayerId,
-                PaymentsAmount = request.PaymentsAmount,
-                TransferDate = request.TransferDate
+                PlayersContract = PlayerContractMapper.Map(request.PlayersContract)
             };
         }
 
@@ -68,9 +67,8 @@ namespace TransfersModule.Commands
                 ReleasingInstructionId = releasingInstructionId,
                 EngagingClubId = request.EngagingClubId,
                 ReleasingClubId = request.ReleasingClubId,
-                PaymentsAmount = request.PaymentsAmount,
                 PlayerId = request.PlayerId,
-                TransferDate = request.TransferDate
+                PlayersContract = PlayerContractMapper.Map(request.PlayersContract)
             };
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using TransfersModule.Persistence;
 
 namespace TransfersModule.Events
 {
@@ -7,7 +8,6 @@ namespace TransfersModule.Events
         public int EngagingClubId { get; set; }
         public int ReleasingClubId { get; set; }
         public int PlayerId { get; set; }
-        public decimal PaymentsAmount { get; set; }
-        public DateTime TransferDate { get; set; }
+        public PlayersContract PlayersContract { get; set; }
     }
 }

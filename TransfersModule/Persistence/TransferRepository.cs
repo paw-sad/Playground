@@ -34,10 +34,10 @@ namespace TransfersModule.Persistence
                 Id = Guid.NewGuid(),
                 ReleasingClubId = e.ReleasingClubId,
                 EngagingClubId = e.EngagingClubId,
-                PaymentsAmount = e.PaymentsAmount,
                 PlayerId = e.PlayerId,
                 State = TransferState.Confirmed,
-                TransferDate = e.TransferDate
+                CreatedOn = new DateTime(),
+                PlayersContract = e.PlayersContract
             };
 
         public async Task Persist(TransferCompletedEvent e, CancellationToken ct)
@@ -63,8 +63,6 @@ namespace TransfersModule.Persistence
                 EngagingClubId = instructionsMatchedEvent.EngagingClubId,
                 ReleasingClubId = instructionsMatchedEvent.ReleasingClubId,
                 PlayerId = instructionsMatchedEvent.PlayerId,
-                PaymentsAmount = instructionsMatchedEvent.PaymentsAmount,
-                TransferDate = instructionsMatchedEvent.TransferDate,
                 TransferInstructions = new List<TransferInstruction>()
             };
     }

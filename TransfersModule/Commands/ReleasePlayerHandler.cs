@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -12,13 +11,11 @@ namespace TransfersModule.Commands
     internal class ReleasePlayerHandler : IRequestHandler<ReleasePlayerContract.Request, ReleasePlayerContract.Response>
     {
         private readonly TransferInstructionRepository _transferInstructionRepository;
-        private readonly TransfersDbContext _db;
         private readonly TransferRepository _transferRepository;
 
-        public ReleasePlayerHandler(TransferInstructionRepository transferInstructionRepository, TransfersDbContext db, TransferRepository transferRepository)
+        public ReleasePlayerHandler(TransferInstructionRepository transferInstructionRepository, TransferRepository transferRepository)
         {
             _transferInstructionRepository = transferInstructionRepository;
-            _db = db;
             _transferRepository = transferRepository;
         }
 
@@ -40,7 +37,9 @@ namespace TransfersModule.Commands
             var instructionsMatchedEvent = Map(request,
                 transferInstructionId,
                 matchingTransferInstructionId);
-            var transferId = await _transferRepository.Persist(instructionsMatchedEvent, ct);
+            var transferId = await _transferRepository
+                .Persist(instructionsMatchedEvent, ct);
+
             return new ReleasePlayerContract.Response
             {
                 TransferId = transferId
@@ -55,9 +54,8 @@ namespace TransfersModule.Commands
                 ReleasingInstructionId = releasingInstructionId,
                 EngagingClubId = request.EngagingClubId,
                 ReleasingClubId = request.ReleasingClubId,
-                PaymentsAmount = request.PaymentsAmount,
-                PlayerId = request.PlayerId,
-                TransferDate = request.TransferDate
+               PlayerId = request.PlayerId,
+               PlayersContract = PlayerContractMapper.Map(request.PlayersContract)
             };
         }
 
@@ -68,8 +66,7 @@ namespace TransfersModule.Commands
                 EngagingClubId = request.EngagingClubId,
                 ReleasingClubId = request.ReleasingClubId,
                 PlayerId = request.PlayerId,
-                PaymentsAmount = request.PaymentsAmount,
-                TransferDate = request.TransferDate
+                PlayersContract = PlayerContractMapper.Map(request.PlayersContract)
             };
         }
     }

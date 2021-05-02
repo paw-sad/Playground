@@ -1,6 +1,6 @@
-﻿namespace TransfersModule.Persistence
+﻿namespace TransfersModule.Contract.Shared
 {
-    internal enum TransferState
+    public enum TransferState
     {
         Draft,
         Confirmed,

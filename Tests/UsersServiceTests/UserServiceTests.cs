@@ -7,7 +7,7 @@ using UsersService.Contract;
 namespace Tests.UsersServiceTests
 {
     [TestClass]
-    public class Tests
+    public class UserServiceTests
     {
         [TestMethod]
         public void CanAuthenticateIfPasswordAndLoginAreCorrect()

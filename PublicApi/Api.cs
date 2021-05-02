@@ -29,7 +29,7 @@ namespace PublicApi
                 UserId = _currentUserId.Value
             });
 
-            var command = new TransfersModule.Contract.EngageWithoutTransferAgreementContract.Request
+            var command = new TransfersModule.Contract.EngageWithoutTransferAgreement.Request
             {
                 ReleasingClubId = request.ReleasingClubId,
                 PlayerId = request.PlayerId,
@@ -66,8 +66,6 @@ namespace PublicApi
                 ReleasingClubId = request.ReleasingClubId,
                 EngagingClubId = request.EngagingClubId,
                 PlayerId = request.PlayerId,
-                TransferDate = request.TransferDate,
-                PaymentsAmount = request.PaymentsAmount
             };
 
             if (!AuthorizationService.CanExecuteCommand(user, command))

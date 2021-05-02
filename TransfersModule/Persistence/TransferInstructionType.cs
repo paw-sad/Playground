@@ -1,6 +1,6 @@
 ﻿namespace TransfersModule.Persistence
 {
-    public enum TransferInstructionType
+    internal enum TransferInstructionType
     {
         Engaging,
         Releasing,

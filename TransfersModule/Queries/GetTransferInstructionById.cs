@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using MediatR;
 using MongoDB.Driver;
+using TransfersModule.Commands;
 using TransfersModule.Contract;
 using TransfersModule.Persistence;
 
@@ -33,9 +34,8 @@ namespace TransfersModule.Queries
                 EngagingClubId = transferInstruction.EngagingClubId,
                 ReleasingClubId = transferInstruction.ReleasingClubId,
                 PlayerId = transferInstruction.PlayerId,
-                PaymentsAmount = transferInstruction.PaymentsAmount,
-                TransferDate = transferInstruction.TransferDate,
-                Type = transferInstruction.Type,
+                PlayersContract = PlayerContractMapper.Map(transferInstruction.PlayersContract),
+                Type = (Contract.Shared.TransferInstructionType)transferInstruction.Type,
             };
         }
     }

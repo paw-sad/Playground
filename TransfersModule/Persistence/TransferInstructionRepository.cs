@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MongoDB.Driver;
+using TransfersModule.Commands;
 using TransfersModule.Events;
 
 namespace TransfersModule.Persistence
@@ -59,8 +60,7 @@ namespace TransfersModule.Persistence
                 EngagingClubId = e.EngagingClubId,
                 ReleasingClubId = e.ReleasingClubId,
                 PlayerId = e.PlayerId,
-                PaymentsAmount = e.PaymentsAmount,
-                TransferDate = e.TransferDate,
+                PlayersContract = e.PlayersContract,
                 Id = Guid.NewGuid(),
                 Type = TransferInstructionType.Engaging,
                 CreatedOn = DateTime.Now
@@ -81,8 +81,7 @@ namespace TransfersModule.Persistence
                 EngagingClubId = e.EngagingClubId,
                 ReleasingClubId = e.ReleasingClubId,
                 PlayerId = e.PlayerId,
-                PaymentsAmount = e.PaymentsAmount,
-                TransferDate = e.TransferDate,
+                PlayersContract = e.PlayersContract,
                 Type = TransferInstructionType.Releasing,
                 CreatedOn = DateTime.Now
             };

@@ -1,8 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shouldly;
 using TransfersModule;
 using TransfersModule.Contract;
+using TransfersModule.Contract.Shared;
 using TransfersModule.Persistence;
 
 namespace Tests.TransfersModule
@@ -13,11 +15,17 @@ namespace Tests.TransfersModule
         [TestMethod]
         public async Task TestTransferWithNoPayments()
         {
-            var request = new EngageWithoutTransferAgreementContract.Request
+            var request = new EngageWithoutTransferAgreement.Request
             {
                 ReleasingClubId = 1,
                 EngagingClubId = 2,
-                PlayerId = 1
+                PlayerId = 1,
+                PlayersContract = new PlayersContract
+                {
+                    EmploymentContractStart = new DateTime(2020, 01, 01),
+                    EmploymentContractEnd = new DateTime(2021, 01, 01),
+                    Salary = new NoSalary()
+                }
             };
 
             var api = new TransfersApi();

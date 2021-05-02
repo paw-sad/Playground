@@ -7,6 +7,7 @@ using TransfersModule;
 using TransfersModule.Contract;
 using TransfersModule.Persistence;
 using Shouldly;
+using TransfersModule.Contract.Shared;
 
 namespace Tests.TransfersModule
 {
@@ -26,15 +27,7 @@ namespace Tests.TransfersModule
         [TestMethod]
         public async Task CanEngageWithTransferAgreement()
         {
-            // given new request with payments equal 0
-            var request = new EngageWithTransferAgreementContract.Request
-            {
-                ReleasingClubId = 1,
-                EngagingClubId = 2,
-                PlayerId = 1,
-                PaymentsAmount = 0,
-                TransferDate = new DateTime(2020, 01, 01)
-            };
+            var request = GetEngageRequest();
 
             // when calling engage
             var response = await _api.Execute(request);
@@ -48,18 +41,28 @@ namespace Tests.TransfersModule
             transferInstruction.Type.ShouldBe(TransferInstructionType.Engaging);
         }
 
-        [TestMethod]
-        public async Task CanReleaseWithTransferAgreement()
+        private static EngageWithTransferAgreementContract.Request GetEngageRequest()
         {
             // given new request with payments equal 0
-            var request = new ReleasePlayerContract.Request
+            return new EngageWithTransferAgreementContract.Request
             {
                 ReleasingClubId = 1,
                 EngagingClubId = 2,
                 PlayerId = 1,
-                PaymentsAmount = 0,
-                TransferDate = new DateTime(2020, 01, 01)
+                PlayersContract = new PlayersContract
+                {
+                    Salary = new NoSalary(),
+                    EmploymentContractStart = new DateTime(2020, 01, 01),
+                    EmploymentContractEnd = new DateTime(2021, 01, 01)
+                }
             };
+        }
+
+        [TestMethod]
+        public async Task CanReleaseWithTransferAgreement()
+        {
+            // given new request with payments equal 0
+            var request = GetReleaseRequest();
 
             // when calling engage
             var response = await _api.Execute(request);
@@ -73,27 +76,29 @@ namespace Tests.TransfersModule
             transferInstruction.Type.ShouldBe(TransferInstructionType.Releasing);
         }
 
+        private static ReleasePlayerContract.Request GetReleaseRequest()
+        {
+            return new ReleasePlayerContract.Request
+            {
+                ReleasingClubId = 1,
+                EngagingClubId = 2,
+                PlayerId = 1,
+                PlayersContract = new PlayersContract
+                {
+                    Salary = new NoSalary(),
+                    EmploymentContractStart = new DateTime(2020, 01, 01),
+                    EmploymentContractEnd = new DateTime(2021, 01, 01)
+                }
+            };
+        }
+
         [TestMethod]
         public async Task CanPairReleasingInstructionAndCreateTransfer()
         {
-            var engageRequest = new EngageWithTransferAgreementContract.Request
-            {
-                ReleasingClubId = 1,
-                EngagingClubId = 2,
-                PlayerId = 1,
-                PaymentsAmount = 0,
-                TransferDate = new DateTime(2020, 01, 01)
-            };
+            var engageRequest = GetEngageRequest();
 
             await _api.Execute(engageRequest);
-            var releaseRequest = new ReleasePlayerContract.Request
-            {
-                ReleasingClubId = 1,
-                EngagingClubId = 2,
-                PlayerId = 1,
-                PaymentsAmount = 0,
-                TransferDate = new DateTime(2020, 01, 01)
-            };
+            var releaseRequest = GetReleaseRequest();
             var releaseResponse = await _api.Execute(releaseRequest);
             releaseResponse.TransferId.ShouldNotBeNull();
         }
@@ -101,26 +106,11 @@ namespace Tests.TransfersModule
         [TestMethod]
         public async Task CanPairEngagingInstructionAndCreateTransfer()
         {
-            var releaseRequest = new ReleasePlayerContract.Request
-            {
-                ReleasingClubId = 1,
-                EngagingClubId = 2,
-                PlayerId = 1,
-                PaymentsAmount = 0,
-                TransferDate = new DateTime(2020, 01, 01)
-            };
+            var releaseRequest = GetReleaseRequest();
             var releaseResponse = await _api.Execute(releaseRequest);
 
             // given new request with payments equal 0
-            var engageRequest = new EngageWithTransferAgreementContract.Request
-            {
-                ReleasingClubId = 1,
-                EngagingClubId = 2,
-                PlayerId = 1,
-                PaymentsAmount = 0,
-                TransferDate = new DateTime(2020, 01, 01)
-            };
-
+            var engageRequest = GetEngageRequest();
             var engageResponse = await _api.Execute(engageRequest);
             engageResponse.TransferId.ShouldNotBeNull();
 
@@ -130,14 +120,7 @@ namespace Tests.TransfersModule
         [TestMethod]
         public async Task DontPairTwoEngagingInstructions()
         {
-            var engageRequest = new EngageWithTransferAgreementContract.Request
-            {
-                ReleasingClubId = 1,
-                EngagingClubId = 2,
-                PlayerId = 1,
-                PaymentsAmount = 0,
-                TransferDate = new DateTime(2020, 01, 01)
-            };
+            var engageRequest = GetEngageRequest();
 
             var engageResponse1 = await _api.Execute(engageRequest);
 
@@ -161,27 +144,13 @@ namespace Tests.TransfersModule
         [TestMethod]
         public async Task WhenMoreEngagingInstructionsAreAvailableShouldPairWithOldest()
         {
-            var engageRequest = new EngageWithTransferAgreementContract.Request
-            {
-                ReleasingClubId = 1,
-                EngagingClubId = 2,
-                PlayerId = 1,
-                PaymentsAmount = 0,
-                TransferDate = new DateTime(2020, 01, 01)
-            };
+            var engageRequest = GetEngageRequest();
 
             var engageResponse1 = await _api.Execute(engageRequest);
 
             var engageResponse2 = await _api.Execute(engageRequest);
 
-            var releaseRequest = new ReleasePlayerContract.Request
-            {
-                ReleasingClubId = 1,
-                EngagingClubId = 2,
-                PlayerId = 1,
-                PaymentsAmount = 0,
-                TransferDate = new DateTime(2020, 01, 01)
-            };
+            var releaseRequest = GetReleaseRequest();
 
             var releaseResponse = await _api.Execute(releaseRequest);
 
@@ -208,43 +177,72 @@ namespace Tests.TransfersModule
         [TestMethod]
         public async Task WhenMoreReleasingInstructionsAreAvailableShouldPairWithOldest()
         {
-            var releaseRequest = new ReleasePlayerContract.Request
+            async Task<(Guid olderInstructionId, Guid newerInstructionId)> 
+                GivenTwoSameReleasingInstructions()
             {
-                ReleasingClubId = 1,
-                EngagingClubId = 2,
-                PlayerId = 1,
-                PaymentsAmount = 0,
-                TransferDate = new DateTime(2020, 01, 01)
-            };
-            var releaseResponse1 = await _api.Execute(releaseRequest);
-            var releaseResponse2 = await _api.Execute(releaseRequest);
+                var releaseRequest = GetReleaseRequest();
+
+                var response = await _api.Execute(releaseRequest);
+                var response2 = await _api.Execute(releaseRequest);
+                return (response.TransferInstructionId.Value, response2.TransferInstructionId.Value);
+            }
+
+            async Task OnlyTheOldestInstructionShouldBeMatched(
+                (Guid olderInstructionId, Guid newerInstructionId) instructionIds, EngageWithTransferAgreementContract.Response engageResponse)
+            {
+                var releaseInstruction1 = await _api.Execute(new GetTransferInstructionByIdContract.Request
+                {
+                    Id = instructionIds.olderInstructionId
+                });
+                var releaseInstruction2 = await _api.Execute(new GetTransferInstructionByIdContract.Request
+                {
+                    Id = instructionIds.newerInstructionId
+                });
+
+                engageResponse.TransferId.ShouldNotBeNull();
+                engageResponse.TransferInstructionId.ShouldBeNull();
+
+                releaseInstruction1.ShouldBeNull();
+                releaseInstruction2.ShouldNotBeNull();
+            }
+
+            async Task<EngageWithTransferAgreementContract.Response> WhenSubmittingMatchingReleasingInstruction()
+            {
+                var engageRequest = GetEngageRequest();
+                var engageResponse = await _api.Execute(engageRequest);
+                return engageResponse;
+            }
+            
+            var instructionIds = await GivenTwoSameReleasingInstructions();
+            
+            var engageResponse = await WhenSubmittingMatchingReleasingInstruction();
+            
+            await OnlyTheOldestInstructionShouldBeMatched(instructionIds, engageResponse);
+        }
+
+        public async Task Test_instructions_matching_when_there_are_differences_between_engaging_and_releasing_instruction()
+        {
+            // given engaging instruction was already entered
+            // when entering releasing instruction that has only matching ReleasingClubId, EngagingClubId and Player Id
+            // then instructions should be match anyway
 
             var engageRequest = new EngageWithTransferAgreementContract.Request
             {
                 ReleasingClubId = 1,
                 EngagingClubId = 2,
                 PlayerId = 1,
-                PaymentsAmount = 0,
-                TransferDate = new DateTime(2020, 01, 01)
             };
 
-            var engageResponse = await _api.Execute(engageRequest);
-      
-
-            var releaseInstruction1 = await _api.Execute(new GetTransferInstructionByIdContract.Request
+            await _api.Execute(engageRequest);
+            var releaseRequest = new ReleasePlayerContract.Request
             {
-                Id = releaseResponse1.TransferInstructionId.Value
-            });
-            var releaseInstruction2 = await _api.Execute(new GetTransferInstructionByIdContract.Request
-            {
-                Id = releaseResponse2.TransferInstructionId.Value
-            });
+                ReleasingClubId = 1,
+                EngagingClubId = 2,
+                PlayerId = 1,
+            };
+            var releaseResponse = await _api.Execute(releaseRequest);
 
-            engageResponse.TransferId.ShouldNotBeNull();
-            engageResponse.TransferInstructionId.ShouldBeNull();
-
-            releaseInstruction1.ShouldBeNull();
-            releaseInstruction2.ShouldNotBeNull();
         }
     }
+
 }

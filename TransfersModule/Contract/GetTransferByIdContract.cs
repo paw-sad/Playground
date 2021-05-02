@@ -1,6 +1,6 @@
 ﻿using System;
 using MediatR;
-using TransfersModule.Persistence;
+using TransfersModule.Contract.Shared;
 
 namespace TransfersModule.Contract
 {
@@ -17,9 +17,8 @@ namespace TransfersModule.Contract
             public int EngagingClubId { get; set; }
             public int ReleasingClubId { get; set; }
             public int PlayerId { get; set; }
-            public decimal PaymentsAmount { get; set; }
-            public DateTime TransferDate { get; set; }
             public TransferState State { get; set; }
+            public PlayersContract PlayersContract { get; set; }
         }
     }
 }
