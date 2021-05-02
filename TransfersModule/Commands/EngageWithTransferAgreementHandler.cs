@@ -8,7 +8,7 @@ using TransfersModule.Persistence;
 
 namespace TransfersModule.Commands
 {
-    internal class EngageWithTransferAgreementHandler : IRequestHandler<EngageWithTransferAgreementContract.Request, EngageWithTransferAgreementContract.Response>
+    internal class EngageWithTransferAgreementHandler : IRequestHandler<EngageWithTransferAgreement.Request, EngageWithTransferAgreement.Response>
     {
         private readonly TransferInstructionRepository _transferInstructionRepository;
         private readonly TransferRepository _transferRepository;
@@ -19,38 +19,42 @@ namespace TransfersModule.Commands
             _transferRepository = transferRepository;
         }
 
-        public async Task<EngageWithTransferAgreementContract.Response> Handle(EngageWithTransferAgreementContract.Request request, CancellationToken ct)
+        public async Task<EngageWithTransferAgreement.Response> Handle(EngageWithTransferAgreement.Request request, CancellationToken ct)
         {
             var e = Map(request);
-            var transferInstructionId = await _transferInstructionRepository.Persist(e, ct);
+            var transferInstruction = await _transferInstructionRepository.PersistAndGet(e, ct);
+            var matchingTransferInstruction = await _transferInstructionRepository.FindMatchingTransferInstruction(e, ct);
 
-            var matchingTransferInstructionId = await _transferInstructionRepository.FindMatchingTransferInstructionId(e, ct);
-
-            if (matchingTransferInstructionId == Guid.Empty)
+            if (matchingTransferInstruction is null)
             {
-                return new EngageWithTransferAgreementContract.Response
+                return new EngageWithTransferAgreement.Response
                 {
-                    TransferInstructionId = transferInstructionId
+                    TransferInstructionId = transferInstruction.Id
                 };
             }
 
-            var instructionsMatchedEvent = Map(
-                request,
-                transferInstructionId,
-                matchingTransferInstructionId);
+            var matchingResult = CompareTransferInstructions(transferInstruction, matchingTransferInstruction);
+            var instructionsMatchedEvent =
+                Map(request, transferInstruction.Id, matchingTransferInstruction.Id, matchingResult);
 
             var transferId = await _transferRepository
                                     .Persist(instructionsMatchedEvent, ct);
 
-            return new EngageWithTransferAgreementContract.Response
+            return new EngageWithTransferAgreement.Response
             {
                 TransferId = transferId
             };
         }
 
-        private EngageWithTransferAgreementInstructionCreatedEvent Map(EngageWithTransferAgreementContract.Request request)
+
+        private bool CompareTransferInstructions(TransferInstruction a, TransferInstruction b)
         {
-            return new EngageWithTransferAgreementInstructionCreatedEvent
+            return Equals(a, b);
+        }
+
+        private EngageWithTransferAgreementInstructionCreatedEvent Map(EngageWithTransferAgreement.Request request)
+        {
+            return new()
             {
                 EngagingClubId = request.EngagingClubId,
                 ReleasingClubId = request.ReleasingClubId,
@@ -59,16 +63,18 @@ namespace TransfersModule.Commands
             };
         }
 
-        private InstructionsMatchedEvent Map(EngageWithTransferAgreementContract.Request request, Guid engagingInstructionId, Guid releasingInstructionId)
+        private InstructionsMatchedEvent Map(EngageWithTransferAgreement.Request request, Guid engagingInstructionId,
+            Guid releasingInstructionId, bool matchingResult)
         {
-            return new InstructionsMatchedEvent
+            return new()
             {
                 EngagingInstructionId = engagingInstructionId,
                 ReleasingInstructionId = releasingInstructionId,
                 EngagingClubId = request.EngagingClubId,
                 ReleasingClubId = request.ReleasingClubId,
                 PlayerId = request.PlayerId,
-                PlayersContract = PlayerContractMapper.Map(request.PlayersContract)
+                PlayersContract = PlayerContractMapper.Map(request.PlayersContract),
+                PerfectMatch = matchingResult
             };
         }
     }

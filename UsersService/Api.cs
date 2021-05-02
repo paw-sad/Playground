@@ -6,7 +6,7 @@ namespace UsersService
 {
    public class Api
     {
-        private readonly List<User> _users = new List<User>();
+        private readonly List<User> _users = new();
 
         public LogInResponse Authenticate(LogInRequest request)
         {

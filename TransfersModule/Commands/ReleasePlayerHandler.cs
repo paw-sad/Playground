@@ -48,7 +48,7 @@ namespace TransfersModule.Commands
 
         private InstructionsMatchedEvent Map(ReleasePlayerContract.Request request, Guid engagingInstructionId, Guid releasingInstructionId)
         {
-            return new InstructionsMatchedEvent
+            return new()
             {
                 EngagingInstructionId = engagingInstructionId,
                 ReleasingInstructionId = releasingInstructionId,
@@ -61,7 +61,7 @@ namespace TransfersModule.Commands
 
         private ReleasePlayerInstructionCreatedEvent Map(ReleasePlayerContract.Request request)
         {
-            return new ReleasePlayerInstructionCreatedEvent
+            return new()
             {
                 EngagingClubId = request.EngagingClubId,
                 ReleasingClubId = request.ReleasingClubId,

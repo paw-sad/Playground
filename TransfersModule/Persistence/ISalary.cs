@@ -1,4 +1,9 @@
-﻿namespace TransfersModule.Persistence
+﻿using System;
+
+namespace TransfersModule.Persistence
 {
-    internal interface ISalary { }
+    internal interface ISalary : IEquatable<ISalary>
+    {
+
+    }
 }

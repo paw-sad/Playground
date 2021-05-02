@@ -37,12 +37,13 @@ namespace TransfersModule.Commands
         }
 
         private static TransferCreatedEvent Map(Contract.EngageWithoutTransferAgreement.Request request) =>
-            new TransferCreatedEvent
+            new()
             {
                 EngagingClubId = request.EngagingClubId,
                 ReleasingClubId = request.ReleasingClubId,
                 PlayerId = request.PlayerId,
-                PlayersContract = PlayerContractMapper.Map(request.PlayersContract)
+                PlayersContract = PlayerContractMapper.Map(request.PlayersContract),
+                Type = TransferType.WithoutTransferAgreement,
             };
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -14,7 +15,7 @@ namespace Tests.TransfersModule
     [TestClass]
     public class EngageReleasePlayerTests
     {
-        private readonly TransfersApi _api = new TransfersApi();
+        private readonly TransfersApi _api = new();
 
         [TestInitialize]
         public async Task Setup()
@@ -41,10 +42,10 @@ namespace Tests.TransfersModule
             transferInstruction.Type.ShouldBe(TransferInstructionType.Engaging);
         }
 
-        private static EngageWithTransferAgreementContract.Request GetEngageRequest()
+        private static EngageWithTransferAgreement.Request GetEngageRequest()
         {
             // given new request with payments equal 0
-            return new EngageWithTransferAgreementContract.Request
+            return new()
             {
                 ReleasingClubId = 1,
                 EngagingClubId = 2,
@@ -78,7 +79,7 @@ namespace Tests.TransfersModule
 
         private static ReleasePlayerContract.Request GetReleaseRequest()
         {
-            return new ReleasePlayerContract.Request
+            return new()
             {
                 ReleasingClubId = 1,
                 EngagingClubId = 2,
@@ -188,7 +189,7 @@ namespace Tests.TransfersModule
             }
 
             async Task OnlyTheOldestInstructionShouldBeMatched(
-                (Guid olderInstructionId, Guid newerInstructionId) instructionIds, EngageWithTransferAgreementContract.Response engageResponse)
+                (Guid olderInstructionId, Guid newerInstructionId) instructionIds, EngageWithTransferAgreement.Response engageResponse)
             {
                 var releaseInstruction1 = await _api.Execute(new GetTransferInstructionByIdContract.Request
                 {
@@ -206,7 +207,7 @@ namespace Tests.TransfersModule
                 releaseInstruction2.ShouldNotBeNull();
             }
 
-            async Task<EngageWithTransferAgreementContract.Response> WhenSubmittingMatchingReleasingInstruction()
+            async Task<EngageWithTransferAgreement.Response> WhenSubmittingMatchingReleasingInstruction()
             {
                 var engageRequest = GetEngageRequest();
                 var engageResponse = await _api.Execute(engageRequest);
@@ -218,30 +219,6 @@ namespace Tests.TransfersModule
             var engageResponse = await WhenSubmittingMatchingReleasingInstruction();
             
             await OnlyTheOldestInstructionShouldBeMatched(instructionIds, engageResponse);
-        }
-
-        public async Task Test_instructions_matching_when_there_are_differences_between_engaging_and_releasing_instruction()
-        {
-            // given engaging instruction was already entered
-            // when entering releasing instruction that has only matching ReleasingClubId, EngagingClubId and Player Id
-            // then instructions should be match anyway
-
-            var engageRequest = new EngageWithTransferAgreementContract.Request
-            {
-                ReleasingClubId = 1,
-                EngagingClubId = 2,
-                PlayerId = 1,
-            };
-
-            await _api.Execute(engageRequest);
-            var releaseRequest = new ReleasePlayerContract.Request
-            {
-                ReleasingClubId = 1,
-                EngagingClubId = 2,
-                PlayerId = 1,
-            };
-            var releaseResponse = await _api.Execute(releaseRequest);
-
         }
     }
 

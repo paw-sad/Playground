@@ -9,6 +9,15 @@ namespace TransfersModule.Contract
         public class Request : IRequest<Response>
         {
             public Guid Id { get; set; }
+
+            public Request()
+            {
+            }
+
+            public Request(Guid id)
+            {
+                Id = id;
+            }
         }
 
         public class Response

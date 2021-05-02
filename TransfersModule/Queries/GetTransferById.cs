@@ -27,7 +27,7 @@ namespace TransfersModule.Queries
 
         private static GetTransferByIdContract.Response Map(Transfer transfer)
         {
-            return new GetTransferByIdContract.Response
+            return new()
             {
                 Id = transfer.Id,
                 EngagingClubId = transfer.EngagingClubId,

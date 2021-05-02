@@ -11,8 +11,6 @@ namespace TransfersModule.Persistence
         public int PlayerId { get; set; }
         public PlayersContract PlayersContract { get; set; }
         public TransferState State { get; set; }
-
-        public virtual ICollection<TransferInstruction> TransferInstructions { get; set; }
         public TransferType Type { get; internal set; }
         public DateTime CreatedOn { get; internal set; }
     }

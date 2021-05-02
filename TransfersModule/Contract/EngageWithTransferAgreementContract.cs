@@ -4,7 +4,7 @@ using TransfersModule.Contract.Shared;
 
 namespace TransfersModule.Contract
 {
-    public class EngageWithTransferAgreementContract
+    public class EngageWithTransferAgreement
     {
         public class Request : IRequest<Response>
         {

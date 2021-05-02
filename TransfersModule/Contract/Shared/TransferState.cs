@@ -5,6 +5,7 @@
         Draft,
         Confirmed,
         Completed,
-        AwaitingCounterInstruction
+        AwaitingCounterInstruction,
+        MatchingException
     }
 }

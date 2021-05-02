@@ -9,5 +9,6 @@ namespace TransfersModule.Events
         public int ReleasingClubId { get; set; }
         public int PlayerId { get; set; }
         public PlayersContract PlayersContract { get; set; }
+        public TransferType Type { get; set; }
     }
 }

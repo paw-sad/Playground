@@ -29,7 +29,7 @@ namespace TransfersModule.Persistence
         }
 
         private Transfer Map(TransferCreatedEvent e)
-            => new Transfer
+            => new()
             {
                 Id = Guid.NewGuid(),
                 ReleasingClubId = e.ReleasingClubId,
@@ -37,7 +37,8 @@ namespace TransfersModule.Persistence
                 PlayerId = e.PlayerId,
                 State = TransferState.Confirmed,
                 CreatedOn = new DateTime(),
-                PlayersContract = e.PlayersContract
+                PlayersContract = e.PlayersContract,
+                Type = e.Type
             };
 
         public async Task Persist(TransferCompletedEvent e, CancellationToken ct)
@@ -58,12 +59,16 @@ namespace TransfersModule.Persistence
         }
 
         private Transfer Map(InstructionsMatchedEvent instructionsMatchedEvent)
-            => new Transfer
+            => new()
             {
                 EngagingClubId = instructionsMatchedEvent.EngagingClubId,
                 ReleasingClubId = instructionsMatchedEvent.ReleasingClubId,
                 PlayerId = instructionsMatchedEvent.PlayerId,
-                TransferInstructions = new List<TransferInstruction>()
+                PlayersContract =  instructionsMatchedEvent.PlayersContract,
+                CreatedOn = DateTime.Now,
+                Type = TransferType.WithTransferAgreement,
+                State = instructionsMatchedEvent.PerfectMatch? TransferState.Confirmed : TransferState.MatchingException,
+                Id = Guid.NewGuid()
             };
     }
 }
