@@ -42,23 +42,6 @@ namespace Tests.TransfersModule
             transferInstruction.Type.ShouldBe(TransferInstructionType.Engaging);
         }
 
-        private static EngageWithTransferAgreement.Request GetEngageRequest()
-        {
-            // given new request with payments equal 0
-            return new()
-            {
-                ReleasingClubId = 1,
-                EngagingClubId = 2,
-                PlayerId = 1,
-                PlayersContract = new PlayersContract
-                {
-                    Salary = new NoSalary(),
-                    EmploymentContractStart = new DateTime(2020, 01, 01),
-                    EmploymentContractEnd = new DateTime(2021, 01, 01)
-                }
-            };
-        }
-
         [TestMethod]
         public async Task CanReleaseWithTransferAgreement()
         {
@@ -76,23 +59,7 @@ namespace Tests.TransfersModule
 
             transferInstruction.Type.ShouldBe(TransferInstructionType.Releasing);
         }
-
-        private static ReleasePlayerContract.Request GetReleaseRequest()
-        {
-            return new()
-            {
-                ReleasingClubId = 1,
-                EngagingClubId = 2,
-                PlayerId = 1,
-                PlayersContract = new PlayersContract
-                {
-                    Salary = new NoSalary(),
-                    EmploymentContractStart = new DateTime(2020, 01, 01),
-                    EmploymentContractEnd = new DateTime(2021, 01, 01)
-                }
-            };
-        }
-
+     
         [TestMethod]
         public async Task CanPairReleasingInstructionAndCreateTransfer()
         {
@@ -220,6 +187,37 @@ namespace Tests.TransfersModule
             
             await OnlyTheOldestInstructionShouldBeMatched(instructionIds, engageResponse);
         }
-    }
 
+        private static EngageWithTransferAgreement.Request GetEngageRequest()
+        {
+            // given new request with payments equal 0
+            return new()
+            {
+                ReleasingClubId = 1,
+                EngagingClubId = 2,
+                PlayerId = 1,
+                PlayersContract = new PlayersContract
+                {
+                    Salary = new NoSalary(),
+                    EmploymentContractStart = new DateTime(2020, 01, 01),
+                    EmploymentContractEnd = new DateTime(2021, 01, 01)
+                }
+            };
+        }
+        private static ReleasePlayerContract.Request GetReleaseRequest()
+        {
+            return new()
+            {
+                ReleasingClubId = 1,
+                EngagingClubId = 2,
+                PlayerId = 1,
+                PlayersContract = new PlayersContract
+                {
+                    Salary = new NoSalary(),
+                    EmploymentContractStart = new DateTime(2020, 01, 01),
+                    EmploymentContractEnd = new DateTime(2021, 01, 01)
+                }
+            };
+        }
+    }
 }

@@ -12,37 +12,24 @@ namespace TransfersModule.Commands
     {
         private readonly TransferInstructionRepository _transferInstructionRepository;
         private readonly TransferRepository _transferRepository;
+        private readonly IMediator _mediator;
 
-        public ReleasePlayerHandler(TransferInstructionRepository transferInstructionRepository, TransferRepository transferRepository)
+        public ReleasePlayerHandler(TransferInstructionRepository transferInstructionRepository, TransferRepository transferRepository, IMediator mediator)
         {
             _transferInstructionRepository = transferInstructionRepository;
             _transferRepository = transferRepository;
+            _mediator = mediator;
         }
 
         public async Task<ReleasePlayerContract.Response> Handle(ReleasePlayerContract.Request request, CancellationToken ct)
         {
             var e = Map(request);
-            var transferInstructionId = await _transferInstructionRepository.Persist(e, ct);
 
-            var matchingTransferInstructionId = await _transferInstructionRepository.FindMatchingTransferInstructionId(e, ct);
-
-            if (matchingTransferInstructionId == Guid.Empty)
-            {
-                return new ReleasePlayerContract.Response
-                {
-                    TransferInstructionId = transferInstructionId
-                };
-            }
-
-            var instructionsMatchedEvent = Map(request,
-                transferInstructionId,
-                matchingTransferInstructionId);
-            var transferId = await _transferRepository
-                .Persist(instructionsMatchedEvent, ct);
+            await _mediator.Publish(e, ct);
 
             return new ReleasePlayerContract.Response
             {
-                TransferId = transferId
+                TransferId = e.Id
             };
         }
 
@@ -54,8 +41,8 @@ namespace TransfersModule.Commands
                 ReleasingInstructionId = releasingInstructionId,
                 EngagingClubId = request.EngagingClubId,
                 ReleasingClubId = request.ReleasingClubId,
-               PlayerId = request.PlayerId,
-               PlayersContract = PlayerContractMapper.Map(request.PlayersContract)
+                PlayerId = request.PlayerId,
+                PlayersContract = PlayerContractMapper.Map(request.PlayersContract)
             };
         }
 
@@ -63,6 +50,7 @@ namespace TransfersModule.Commands
         {
             return new()
             {
+                Id = Guid.NewGuid(),
                 EngagingClubId = request.EngagingClubId,
                 ReleasingClubId = request.ReleasingClubId,
                 PlayerId = request.PlayerId,

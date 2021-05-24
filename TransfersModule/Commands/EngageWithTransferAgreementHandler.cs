@@ -12,69 +12,35 @@ namespace TransfersModule.Commands
     {
         private readonly TransferInstructionRepository _transferInstructionRepository;
         private readonly TransferRepository _transferRepository;
+        private readonly IMediator _mediator;
 
-        public EngageWithTransferAgreementHandler(TransferInstructionRepository transferInstructionRepository, TransferRepository transferRepository)
+        public EngageWithTransferAgreementHandler(TransferInstructionRepository transferInstructionRepository, TransferRepository transferRepository, IMediator mediator)
         {
             _transferInstructionRepository = transferInstructionRepository;
             _transferRepository = transferRepository;
+            _mediator = mediator;
         }
 
         public async Task<EngageWithTransferAgreement.Response> Handle(EngageWithTransferAgreement.Request request, CancellationToken ct)
         {
             var e = Map(request);
-            var transferInstruction = await _transferInstructionRepository.PersistAndGet(e, ct);
-            var matchingTransferInstruction = await _transferInstructionRepository.FindMatchingTransferInstruction(e, ct);
-
-            if (matchingTransferInstruction is null)
-            {
-                return new EngageWithTransferAgreement.Response
-                {
-                    TransferInstructionId = transferInstruction.Id
-                };
-            }
-
-            var matchingResult = CompareTransferInstructions(transferInstruction, matchingTransferInstruction);
-            var instructionsMatchedEvent =
-                Map(request, transferInstruction.Id, matchingTransferInstruction.Id, matchingResult);
-
-            var transferId = await _transferRepository
-                                    .Persist(instructionsMatchedEvent, ct);
+            await _mediator.Publish(e, ct);
 
             return new EngageWithTransferAgreement.Response
             {
-                TransferId = transferId
+                TransferId = e.Id
             };
-        }
-
-
-        private bool CompareTransferInstructions(TransferInstruction a, TransferInstruction b)
-        {
-            return Equals(a, b);
         }
 
         private EngageWithTransferAgreementInstructionCreatedEvent Map(EngageWithTransferAgreement.Request request)
         {
             return new()
             {
+                Id = Guid.NewGuid(),
                 EngagingClubId = request.EngagingClubId,
                 ReleasingClubId = request.ReleasingClubId,
                 PlayerId = request.PlayerId,
                 PlayersContract = PlayerContractMapper.Map(request.PlayersContract)
-            };
-        }
-
-        private InstructionsMatchedEvent Map(EngageWithTransferAgreement.Request request, Guid engagingInstructionId,
-            Guid releasingInstructionId, bool matchingResult)
-        {
-            return new()
-            {
-                EngagingInstructionId = engagingInstructionId,
-                ReleasingInstructionId = releasingInstructionId,
-                EngagingClubId = request.EngagingClubId,
-                ReleasingClubId = request.ReleasingClubId,
-                PlayerId = request.PlayerId,
-                PlayersContract = PlayerContractMapper.Map(request.PlayersContract),
-                PerfectMatch = matchingResult
             };
         }
     }

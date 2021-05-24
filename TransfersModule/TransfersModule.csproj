@@ -25,4 +25,8 @@
     <PackageReference Include="MongoDB.Driver" Version="2.12.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="EventHandlers\" />
+  </ItemGroup>
+
 </Project>
