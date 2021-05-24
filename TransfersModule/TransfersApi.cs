@@ -29,7 +29,6 @@ namespace TransfersModule
             var mediatrOpenTypes = new[]
             {
                 typeof(IRequestHandler<,>),
-                typeof(INotificationHandler<>),
             };
 
             foreach (var mediatrOpenType in mediatrOpenTypes)

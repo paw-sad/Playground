@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using TransfersModule.Events;
@@ -9,28 +8,37 @@ namespace TransfersModule.Commands
 {
     internal class EngageWithoutTransferAgreement : IRequestHandler<Contract.EngageWithoutTransferAgreement.Request, Contract.EngageWithoutTransferAgreement.Response>
     {
-        private readonly IMediator _mediator;
+        private readonly TransferRepository _transferRepository;
 
-        public EngageWithoutTransferAgreement(IMediator mediator)
+        public EngageWithoutTransferAgreement(TransferRepository transferRepository)
         {
-            _mediator = mediator;
+            _transferRepository = transferRepository;
         }
 
         public async Task<Contract.EngageWithoutTransferAgreement.Response> Handle(Contract.EngageWithoutTransferAgreement.Request request, CancellationToken ct)
         {
             var transferCreatedEvent = Map(request);
-            await _mediator.Publish(transferCreatedEvent, ct);
+            var transferId = _transferRepository.Persist(transferCreatedEvent);
+
+            if (transferCreatedEvent.PlayersContract.Salary is NoSalary)
+            {
+                var transferCompletedEvent = new TransferCompletedEvent
+                {
+                    TransferId = transferId
+                };
+
+                await _transferRepository.Persist(transferCompletedEvent, ct);
+            }
 
             return new Contract.EngageWithoutTransferAgreement.Response
             {
-                TransferId = transferCreatedEvent.TransferId
+                TransferId = transferId
             };
         }
 
         private static TransferCreatedEvent Map(Contract.EngageWithoutTransferAgreement.Request request) =>
             new()
             {
-                TransferId = Guid.NewGuid(),
                 EngagingClubId = request.EngagingClubId,
                 ReleasingClubId = request.ReleasingClubId,
                 PlayerId = request.PlayerId,

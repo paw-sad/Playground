@@ -21,6 +21,18 @@ namespace TransfersModule.Persistence
             return _transferInstructions;
         }
 
+        public async Task<Guid> FindMatchingTransferInstructionId(
+            EngageWithTransferAgreementInstructionCreatedEvent e, CancellationToken ct)
+        {
+           return await Query()
+                .Find(i =>
+                    i.EngagingClubId == e.EngagingClubId
+                    && i.ReleasingClubId == e.ReleasingClubId
+                    && i.PlayerId == e.PlayerId && i.Type == TransferInstructionType.Releasing)
+                .Project(x => x.Id)
+                .FirstOrDefaultAsync(ct);
+        }      
+        
         public async Task<TransferInstruction> FindMatchingTransferInstruction(
             EngageWithTransferAgreementInstructionCreatedEvent e, CancellationToken ct)
         {
@@ -44,6 +56,14 @@ namespace TransfersModule.Persistence
                 .FirstOrDefaultAsync(ct);
         }
 
+        public async Task<Guid> Persist(
+            EngageWithTransferAgreementInstructionCreatedEvent e, CancellationToken ct)
+        {
+            var entity = Map(e);
+            await _transferInstructions.InsertOneAsync(entity, null, ct);
+            return entity.Id;
+        }
+
         public async Task<TransferInstruction> PersistAndGet(
             EngageWithTransferAgreementInstructionCreatedEvent e, CancellationToken ct)
         {
@@ -60,7 +80,7 @@ namespace TransfersModule.Persistence
                 ReleasingClubId = e.ReleasingClubId,
                 PlayerId = e.PlayerId,
                 PlayersContract = e.PlayersContract,
-                Id = e.Id,
+                Id = Guid.NewGuid(),
                 Type = TransferInstructionType.Engaging,
                 CreatedOn = DateTime.Now
             };

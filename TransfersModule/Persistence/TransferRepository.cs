@@ -20,16 +20,18 @@ namespace TransfersModule.Persistence
 
         public IMongoCollection<Transfer> Query() => _transfers;
 
-        public void Persist(TransferCreatedEvent transferCreatedEvent)
+        public Guid Persist(TransferCreatedEvent transferCreatedEvent)
         {
             var transfer = Map(transferCreatedEvent);
             _transfers.InsertOne(transfer);
+
+            return transfer.Id;
         }
 
         private Transfer Map(TransferCreatedEvent e)
             => new()
             {
-                Id = e.TransferId,
+                Id = Guid.NewGuid(),
                 ReleasingClubId = e.ReleasingClubId,
                 EngagingClubId = e.EngagingClubId,
                 PlayerId = e.PlayerId,
@@ -56,17 +58,17 @@ namespace TransfersModule.Persistence
             return transfer.Id;
         }
 
-        private Transfer Map(InstructionsMatchedEvent e)
+        private Transfer Map(InstructionsMatchedEvent instructionsMatchedEvent)
             => new()
             {
-                EngagingClubId = e.EngagingClubId,
-                ReleasingClubId = e.ReleasingClubId,
-                PlayerId = e.PlayerId,
-                PlayersContract =  e.PlayersContract,
+                EngagingClubId = instructionsMatchedEvent.EngagingClubId,
+                ReleasingClubId = instructionsMatchedEvent.ReleasingClubId,
+                PlayerId = instructionsMatchedEvent.PlayerId,
+                PlayersContract =  instructionsMatchedEvent.PlayersContract,
                 CreatedOn = DateTime.Now,
                 Type = TransferType.WithTransferAgreement,
-                State = e.PerfectMatch? TransferState.Confirmed : TransferState.MatchingException,
-                Id = e.Id
+                State = instructionsMatchedEvent.PerfectMatch? TransferState.Confirmed : TransferState.MatchingException,
+                Id = Guid.NewGuid()
             };
     }
 }
