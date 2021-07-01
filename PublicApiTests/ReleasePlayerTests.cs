@@ -5,7 +5,7 @@ using Shouldly;
 using UsersService.Contract;
 using LogInRequest = PublicApi.Contract.LogInRequest;
 
-namespace Tests.PublicApiTests
+namespace PublicApiTests
 {
     [TestClass]
     public class ReleasePlayerTests
