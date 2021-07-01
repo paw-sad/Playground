@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using TransfersModule.Events;
@@ -17,28 +18,34 @@ namespace TransfersModule.Commands
 
         public async Task<Contract.EngageWithoutTransferAgreement.Response> Handle(Contract.EngageWithoutTransferAgreement.Request request, CancellationToken ct)
         {
-            var transferCreatedEvent = Map(request);
-            var transferId = _transferRepository.Persist(transferCreatedEvent);
-
-            if (transferCreatedEvent.PlayersContract.Salary is NoSalary)
+            using (_transferRepository.StartTransaction())
             {
-                var transferCompletedEvent = new TransferCompletedEvent
+                var transferCreatedEvent = Map(request);
+                _transferRepository.Persist(transferCreatedEvent);
+
+                if (transferCreatedEvent.PlayersContract.Salary is NoSalary)
                 {
-                    TransferId = transferId
+                    var transferCompletedEvent = new TransferCompletedEvent
+                    {
+                        TransferId = transferCreatedEvent.TransferId
+                    };
+
+                    await _transferRepository.Persist(transferCompletedEvent, ct);
+                }
+
+                await _transferRepository.CommitTransaction(ct);
+
+                return new Contract.EngageWithoutTransferAgreement.Response
+                {
+                    TransferId = transferCreatedEvent.TransferId
                 };
-
-                await _transferRepository.Persist(transferCompletedEvent, ct);
             }
-
-            return new Contract.EngageWithoutTransferAgreement.Response
-            {
-                TransferId = transferId
-            };
         }
 
         private static TransferCreatedEvent Map(Contract.EngageWithoutTransferAgreement.Request request) =>
             new()
             {
+                TransferId = Guid.NewGuid(),
                 EngagingClubId = request.EngagingClubId,
                 ReleasingClubId = request.ReleasingClubId,
                 PlayerId = request.PlayerId,

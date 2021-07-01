@@ -11,9 +11,9 @@ namespace TransfersModule
     {
         private readonly IMediator _mediator;
 
-        public TransfersApi(string connectionString = "Data Source=localhost;Initial Catalog=Playground;Integrated Security=True", string connectionStringMongo = "mongodb://localhost:27017")
+        public TransfersApi(string connectionStringMongo = "mongodb://mongo1:30001,mongo2:30002/replicaSet=rs0")
         {
-            _mediator = BuildContainer(connectionString, connectionStringMongo);
+            _mediator = BuildContainer(connectionStringMongo);
         }
 
         public async Task<TResponse> Execute<TResponse>(IRequest<TResponse> request)
@@ -21,7 +21,7 @@ namespace TransfersModule
             return await _mediator.Send(request);
         }
 
-        private static IMediator BuildContainer(string connectionString, string connectionStringMongo)
+        private static IMediator BuildContainer(string connectionStringMongo)
         {
             var builder = new ContainerBuilder();
             builder.RegisterAssemblyTypes(typeof(IMediator).GetTypeInfo().Assembly).AsImplementedInterfaces();
