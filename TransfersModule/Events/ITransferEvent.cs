@@ -1,6 +1,11 @@
 ﻿namespace TransfersModule.Events
 {
-    internal interface ITransferEvent
+    public interface ITransferEvent
     {
+    } 
+    
+    public interface ISerializableTransferEvent : ITransferEvent
+    {
+        public string EventType { get; }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace TransfersModule.Persistence
 {
-    internal interface ISalary : IEquatable<ISalary>
+    public interface ISalary : IEquatable<ISalary>
     {
 
     }

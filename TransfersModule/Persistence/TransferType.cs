@@ -1,6 +1,6 @@
 ﻿namespace TransfersModule.Persistence
 {
-    internal enum TransferType
+    public enum TransferType
     {
         WithTransferAgreement,
         WithoutTransferAgreement,

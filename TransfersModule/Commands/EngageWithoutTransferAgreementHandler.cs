@@ -43,7 +43,7 @@ namespace TransfersModule.Commands
         }
 
         private static TransferCreatedEvent Map(Contract.EngageWithoutTransferAgreement.Request request) =>
-            new()
+            new TransferCreatedEvent
             {
                 TransferId = Guid.NewGuid(),
                 EngagingClubId = request.EngagingClubId,

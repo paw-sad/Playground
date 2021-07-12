@@ -14,7 +14,6 @@ namespace TransfersModule.Persistence
         private IClientSessionHandle _openedSession;
         private IMongoCollection<ITransferEvent> _transferEvents => _db.GetCollection<ITransferEvent>("transfer-events");
         private IMongoCollection<Transfer> _transfers => _db.GetCollection<Transfer>("transfers");
-        private IMongoCollection<TransferInstruction> _transferInstructions => _db.GetCollection<TransferInstruction>("transfer-instructions");
 
         public TransferRepository(IMongoDatabase db, IMongoClient client)
         {
@@ -45,7 +44,7 @@ namespace TransfersModule.Persistence
         }
 
         private Transfer Map(TransferCreatedEvent e)
-            => new()
+            => new Transfer()
             {
                 Id = e.TransferId,
                 ReleasingClubId = e.ReleasingClubId,
@@ -63,31 +62,5 @@ namespace TransfersModule.Persistence
             await _transfers.UpdateOneAsync(x => x.Id == e.TransferId, Builders<Transfer>
                 .Update.Set(x => x.State, TransferState.Completed), cancellationToken: ct);
         }
-
-        public async Task<Guid> Persist(InstructionsMatchedEvent instructionsMatchedEvent, CancellationToken ct)
-        {
-            var transfer = Map(instructionsMatchedEvent);
-            using var session = await _db.Client.StartSessionAsync(null, ct);
-
-            await _transferInstructions.DeleteManyAsync(x =>
-                x.Id == instructionsMatchedEvent.ReleasingInstructionId
-                || x.Id == instructionsMatchedEvent.EngagingInstructionId, ct);
-            await _transfers.InsertOneAsync(transfer, null, ct);
-
-            return transfer.Id;
-        }
-
-        private Transfer Map(InstructionsMatchedEvent instructionsMatchedEvent)
-            => new()
-            {
-                EngagingClubId = instructionsMatchedEvent.EngagingClubId,
-                ReleasingClubId = instructionsMatchedEvent.ReleasingClubId,
-                PlayerId = instructionsMatchedEvent.PlayerId,
-                PlayersContract =  instructionsMatchedEvent.PlayersContract,
-                CreatedOn = DateTime.Now,
-                Type = TransferType.WithTransferAgreement,
-                State = instructionsMatchedEvent.PerfectMatch? TransferState.Confirmed : TransferState.MatchingException,
-                Id = Guid.NewGuid()
-            };
     }
 }

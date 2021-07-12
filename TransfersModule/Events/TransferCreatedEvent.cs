@@ -3,7 +3,7 @@ using TransfersModule.Persistence;
 
 namespace TransfersModule.Events
 {
-    internal class TransferCreatedEvent : ITransferEvent
+    public class TransferCreatedEvent : ISerializableTransferEvent
     {
         public int EngagingClubId { get; set; }
         public int ReleasingClubId { get; set; }
@@ -11,5 +11,7 @@ namespace TransfersModule.Events
         public PlayersContract PlayersContract { get; set; }
         public TransferType Type { get; set; }
         public Guid TransferId { get; set; }
+
+        public string EventType { get; } = typeof(TransferCreatedEvent).FullName;
     }
 }

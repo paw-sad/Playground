@@ -5,7 +5,6 @@ using Shouldly;
 using TransfersModule;
 using TransfersModule.Contract;
 using TransfersModule.Contract.Shared;
-using TransfersModule.Persistence;
 
 namespace Tests.TransfersModule
 {

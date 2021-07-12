@@ -7,7 +7,7 @@ namespace TransfersModule.Commands
     internal static class PlayerContractMapper
     {
         public static PlayersContract Map(Contract.Shared.PlayersContract contract) =>
-            new()
+            new PlayersContract()
             {
                 EmploymentContractStart = contract.EmploymentContractStart,
                 EmploymentContractEnd = contract.EmploymentContractEnd,
@@ -15,7 +15,7 @@ namespace TransfersModule.Commands
             };  
         
         public static Contract.Shared.PlayersContract Map(PlayersContract contract) =>
-            new()
+            new Contract.Shared.PlayersContract()
             {
                 EmploymentContractStart = contract.EmploymentContractStart,
                 EmploymentContractEnd = contract.EmploymentContractEnd,
@@ -53,19 +53,19 @@ namespace TransfersModule.Commands
         }
 
         private static PlayersSalaryIrregular Map(Contract.Shared.PlayersSalaryIrregular irregularSalary) =>
-            new()
+            new PlayersSalaryIrregular()
             {
                 SalaryPeriods = irregularSalary.SalaryPeriods.Select(Map).ToList()
             };       
         
         private static Contract.Shared.PlayersSalaryIrregular Map(PlayersSalaryIrregular irregularSalary) =>
-            new()
+            new Contract.Shared.PlayersSalaryIrregular()
             {
                 SalaryPeriods = irregularSalary.SalaryPeriods.Select(Map).ToList()
             };
 
         private static IrregularSalaryPeriod Map(Contract.Shared.IrregularSalaryPeriod irregularSalary) =>
-            new()
+            new IrregularSalaryPeriod()
             {
                 PeriodStart = irregularSalary.PeriodStart,
                 PeriodEnd = irregularSalary.PeriodEnd,
@@ -74,7 +74,7 @@ namespace TransfersModule.Commands
             };      
         
         private static Contract.Shared.IrregularSalaryPeriod Map(IrregularSalaryPeriod irregularSalary) =>
-            new()
+            new Contract.Shared.IrregularSalaryPeriod()
             {
                 PeriodStart = irregularSalary.PeriodStart,
                 PeriodEnd = irregularSalary.PeriodEnd,
@@ -83,7 +83,7 @@ namespace TransfersModule.Commands
             };
 
         private static PlayersSalaryRegular Map(Contract.Shared.PlayersSalaryRegular irregularSalary) =>
-            new()
+            new PlayersSalaryRegular()
             {
                 SalaryAmount = irregularSalary.SalaryAmount,
                 CurrencyCode = irregularSalary.CurrencyCode,
@@ -91,7 +91,7 @@ namespace TransfersModule.Commands
             };
 
         private static Contract.Shared.PlayersSalaryRegular Map(PlayersSalaryRegular irregularSalary) =>
-            new()
+            new Contract.Shared.PlayersSalaryRegular()
             {
                 SalaryAmount = irregularSalary.SalaryAmount,
                 CurrencyCode = irregularSalary.CurrencyCode,

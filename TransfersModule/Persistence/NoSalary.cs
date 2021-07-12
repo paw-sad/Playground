@@ -1,6 +1,6 @@
 ﻿namespace TransfersModule.Persistence
 {
-    internal class NoSalary : ISalary
+    public class NoSalary : ISalary
     {
         public bool Equals(ISalary other)
         {

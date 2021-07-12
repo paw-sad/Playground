@@ -2,7 +2,7 @@
 
 namespace TransfersModule.Persistence
 {
-    internal class PlayersContract
+    public class PlayersContract
     {
         public DateTime EmploymentContractStart { get; set; }
         public DateTime EmploymentContractEnd { get; set; }

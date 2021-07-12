@@ -55,9 +55,6 @@ namespace TransfersModule
                 .RegisterType<TransferRepository>()
                 .As<TransferRepository>();
 
-            builder
-                .RegisterType<TransferInstructionRepository>()
-                .As<TransferInstructionRepository>();
 
             builder.Register<ServiceFactory>(ctx =>
             {
