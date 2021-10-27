@@ -1,11 +1,9 @@
-﻿namespace TransfersModule.Contract.Shared
+﻿namespace TransfersService.Contract.Shared
 {
     public enum TransferState
     {
         Draft,
         Confirmed,
         Completed,
-        AwaitingCounterInstruction,
-        MatchingException
     }
 }

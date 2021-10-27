@@ -1,7 +1,6 @@
 ﻿using System;
-using TransfersModule.Persistence;
 
-namespace TransfersModule.Events
+namespace TransfersService.Events
 {
     internal class TransferCompletedEvent: ITransferEvent
     {

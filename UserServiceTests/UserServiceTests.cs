@@ -1,72 +1,94 @@
 ﻿using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Mongo2Go;
+using MongoDB.Bson.Serialization;
+using MongoDB.Driver;
 using Shouldly;
-using UsersService;
-using UsersService.Contract;
+using UsersService.Domain.Events;
+using UsersService.Features.CreateUser;
+using UsersService.Infrastructure;
+using DomainUser = UsersService.Domain.Entities.User;
+using UserEntity = UsersService.Infrastructure.DatabaseEntities.User;
 
-namespace Tests.UsersServiceTests
+namespace UsersService.Tests
 {
     [TestClass]
     public class UserServiceTests
     {
         [TestMethod]
-        public void CanAuthenticateIfPasswordAndLoginAreCorrect()
+        public async Task TestUsingMediatr()
         {
-            var api = new Api();
-            var registerUserResponse = api.RegisterUser(new RegisterUserRequest
+            var mediator = UsersService.Setup.GetClient();
+            var userId = await mediator.Send(new CreateUserCommand
             {
-                UserName = "Juventus",
-                Password = "1234",
-                ClubId = 1
+                UserName = "Piotr Sadowski"
             });
-
-            var logInResponse = api.Authenticate(new LogInRequest
-            {
-                UserName = "Juventus",
-                Password = "1234"
-            });
-
-            logInResponse.UserId.ShouldBe(registerUserResponse.UserId);
+            
+            userId.ShouldNotBe(default);
         }
 
         [TestMethod]
-        public void CantAuthenticateIfPasswordIsNotAreCorrect()
+        public void UnitTestOnTheDomainUser()
         {
-            var api = new Api();
-            api.RegisterUser(new RegisterUserRequest
-            {
-                UserName = "Juventus",
-                Password = "1234",
-                ClubId = 1
-            });
+            var userId = Guid.NewGuid();
+            var userName = "Pawel Sadowski";
 
-            Should.Throw<Exception>(() => api.Authenticate(new LogInRequest
-            {
-                UserName = "Juventus",
-                Password = "0000"
-            }));
+            var user = DomainUser.Create(userId, userName);
+
+            user.Id.ShouldBe(userId);
+            user.Name.ShouldBe(userName);
+            user.NewEvents.Count.ShouldBe(1);
+            var userCreatedEvent = user.NewEvents.First() as UserCreatedEvent;
+
+            userCreatedEvent.Name.ShouldBe(userName);
         }
 
         [TestMethod]
-        public void CanGetUserById()
+        public async Task UserRepositoryTestUsingInMemmoryMongoDb()
         {
-            var api = new Api();
-            var registerUserResponse = api.RegisterUser(new RegisterUserRequest
-            {
-                UserName = "Juventus",
-                Password = "1234",
-                ClubId = 1
-            });
+            using var mongo = MongoDbRunner.Start(singleNodeReplSet: true);
 
-            var getUserResponse = api.GetUserById(new GetUserByIdRequest
-            {
-                UserId = registerUserResponse.UserId
+            var client = new MongoClient(mongo.ConnectionString);
+            var db = client.GetDatabase("test-user-repo");
+            var repo = new UserRepository(db, client);
 
-            });
+            var userId = Guid.NewGuid();
+            var userName = Guid.NewGuid().ToString();
 
-            getUserResponse.ClubId.ShouldBe(1);
-            getUserResponse.UserId.ShouldBe(registerUserResponse.UserId);
-            getUserResponse.UserName.ShouldBe("Juventus");
+            var domainUser = DomainUser.Create(userId, userName);
+
+            await repo.AddAsync(domainUser, CancellationToken.None);
+
+            var dbUser = await db.GetCollection<UserEntity>("Users").Find(x => x.Id == domainUser.Id).FirstOrDefaultAsync();
+
+            dbUser.ShouldNotBeNull();
+            dbUser.Id.ShouldBe(domainUser.Id);
+            dbUser.Name.ShouldBe(domainUser.Name);
+
+            var events = await db.GetCollection<UsersService.Infrastructure.DatabaseEntities.UserEvent>("UserEvents")
+                .Find(x => x.UserId == domainUser.Id).ToListAsync();
+            events.Count.ShouldBe(1);
+
+            var @event = events.First() as UsersService.Infrastructure.DatabaseEntities.UserCreatedEvent;
+            @event.Id.ShouldNotBe(default);
+            @event.UserId.ShouldBe(domainUser.Id);
+            @event.Name.ShouldBe(userName);
+        }
+
+        [TestMethod]
+        public void T()
+        {
+            BsonClassMap.RegisterClassMap<UserCreatedEvent>();
+            BsonClassMap.RegisterClassMap<UserDeletedEvent>();
+            string connectionStringMongo = "mongodb://mongo1:30001,mongo2:30002/replicaSet=rs0";
+            var mongoClient = new MongoClient(connectionStringMongo);
+            var db = mongoClient.GetDatabase("users-module");
+            var users = db.GetCollection<UserEntity>("Users");
+            var newUserId = Guid.NewGuid();
+            var newUserName = Guid.NewGuid().ToString();
         }
     }
 }

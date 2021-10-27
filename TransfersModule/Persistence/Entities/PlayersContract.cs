@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TransfersService.Contract.Shared
+namespace TransfersService.Persistence.Entities
 {
     public class PlayersContract
     {

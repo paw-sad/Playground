@@ -2,10 +2,10 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Confluent.Kafka;
+using TransfersService.Events;
 
-namespace KafkaConsumer
+namespace TransferProjections
 {
-
     public class Startup
     {
         public static async Task Main()
@@ -18,18 +18,18 @@ namespace KafkaConsumer
             };
 
             using var consumer = new ConsumerBuilder<Ignore,
-                string>(conf).Build();
+                ISerializableTransferEvent>(conf).Build();
 
             var cancelToken = new CancellationTokenSource();
-             
+
             StartConsumerLoop(consumer, "hello-world-2", cancelToken.Token);
-      
+
             Console.ReadLine();
             cancelToken.Cancel();
         }
 
 
-        private static void StartConsumerLoop(IConsumer<Ignore, string> consumer, string topic, CancellationToken cancellationToken)
+        private static void StartConsumerLoop(IConsumer<Ignore, ISerializableTransferEvent> consumer, string topic, CancellationToken cancellationToken)
         {
             consumer.Subscribe(topic);
 
@@ -38,10 +38,13 @@ namespace KafkaConsumer
                 try
                 {
                     var result = consumer.Consume(cancellationToken);
-
+                    switch (result)
+                    {
+                        
+                    }
                     if (result != null)
                     {
-                        Console.WriteLine($"Message: {result.Message.Value} received from {result.TopicPartitionOffset}");
+                        Console.WriteLine($"Message received from {result.TopicPartitionOffset}");
                     }
                 }
                 catch (OperationCanceledException)

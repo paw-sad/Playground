@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TransfersService.Contract.Shared
+namespace TransfersService.Domain
 {
     public class PlayersContract
     {

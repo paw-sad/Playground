@@ -1,11 +1,9 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using TransfersModule.Events;
-using TransfersModule.Persistence;
+using TransfersService.Persistence;
 
-namespace TransfersModule.Commands
+namespace TransfersService.Commands
 {
     internal class EngageWithoutTransferAgreement : IRequestHandler<Contract.EngageWithoutTransferAgreement.Request, Contract.EngageWithoutTransferAgreement.Response>
     {
@@ -18,39 +16,15 @@ namespace TransfersModule.Commands
 
         public async Task<Contract.EngageWithoutTransferAgreement.Response> Handle(Contract.EngageWithoutTransferAgreement.Request request, CancellationToken ct)
         {
-            using (_transferRepository.StartTransaction())
+            var transfer = Domain.Transfer.CreateNewEngageWithoutTransferAgreement(request);
+
+            await _transferRepository.Add(transfer, ct);
+
+            return new Contract.EngageWithoutTransferAgreement.Response
             {
-                var transferCreatedEvent = Map(request);
-                _transferRepository.Persist(transferCreatedEvent);
-
-                if (transferCreatedEvent.PlayersContract.Salary is NoSalary)
-                {
-                    var transferCompletedEvent = new TransferCompletedEvent
-                    {
-                        TransferId = transferCreatedEvent.TransferId
-                    };
-
-                    await _transferRepository.Persist(transferCompletedEvent, ct);
-                }
-
-                await _transferRepository.CommitTransaction(ct);
-
-                return new Contract.EngageWithoutTransferAgreement.Response
-                {
-                    TransferId = transferCreatedEvent.TransferId
-                };
-            }
-        }
-
-        private static TransferCreatedEvent Map(Contract.EngageWithoutTransferAgreement.Request request) =>
-            new TransferCreatedEvent
-            {
-                TransferId = Guid.NewGuid(),
-                EngagingClubId = request.EngagingClubId,
-                ReleasingClubId = request.ReleasingClubId,
-                PlayerId = request.PlayerId,
-                PlayersContract = PlayerContractMapper.Map(request.PlayersContract),
-                Type = TransferType.WithoutTransferAgreement,
+                TransferId = transfer.Id
             };
+        }
     }
+
 }

@@ -1,4 +1,4 @@
-﻿namespace TransfersModule.Events
+﻿namespace TransfersService.Events
 {
     public interface ITransferEvent
     {

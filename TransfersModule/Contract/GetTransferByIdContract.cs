@@ -1,8 +1,8 @@
 ﻿using System;
 using MediatR;
-using TransfersModule.Contract.Shared;
+using TransfersService.Contract.Shared;
 
-namespace TransfersModule.Contract
+namespace TransfersService.Contract
 {
     public class GetTransferByIdContract
     {

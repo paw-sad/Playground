@@ -1,9 +1,9 @@
 ﻿using System;
 using MediatR;
-using TransfersModule.Contract.Shared;
-using PlayersContract = TransfersModule.Contract.Shared.PlayersContract;
+using TransfersService.Contract.Shared;
+using PlayersContract = TransfersService.Contract.Shared.PlayersContract;
 
-namespace TransfersModule.Contract
+namespace TransfersService.Contract
 {
   public class GetTransferInstructionByIdContract : IRequest<GetTransferByIdContract.Response>
     {
@@ -19,7 +19,6 @@ namespace TransfersModule.Contract
             public int ReleasingClubId { get; set; }
             public int PlayerId { get; set; }
             public PlayersContract PlayersContract { get; set; }
-            public TransferInstructionType Type { get; set; }
         }
     }
 }

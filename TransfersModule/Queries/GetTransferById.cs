@@ -2,11 +2,13 @@
 using System.Threading.Tasks;
 using MediatR;
 using MongoDB.Driver;
-using TransfersModule.Commands;
-using TransfersModule.Contract;
-using TransfersModule.Persistence;
+using TransfersService.Commands;
+using TransfersService.Contract;
+using TransfersService.Persistence;
+using TransfersService.Persistence.Entities;
+using TransferState = TransfersService.Contract.Shared.TransferState;
 
-namespace TransfersModule.Queries
+namespace TransfersService.Queries
 {
     internal class GetTransferByIdQuery : IRequestHandler<GetTransferByIdContract.Request, GetTransferByIdContract.Response>
     {
@@ -33,7 +35,7 @@ namespace TransfersModule.Queries
                 EngagingClubId = transfer.EngagingClubId,
                 ReleasingClubId = transfer.ReleasingClubId,
                 PlayerId = transfer.PlayerId,
-                State = (Contract.Shared.TransferState)transfer.State,
+                State = (TransferState)transfer.State,
                 PlayersContract = PlayerContractMapper.Map(transfer.PlayersContract),
             };
         }

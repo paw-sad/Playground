@@ -2,10 +2,12 @@
 using System.Threading.Tasks;
 using Autofac;
 using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
-using TransfersModule.Persistence;
+using TransfersService.Integration;
+using TransfersService.Persistence;
 
-namespace TransfersModule
+namespace TransfersService
 {
     public class TransfersApi
     {
@@ -19,6 +21,22 @@ namespace TransfersModule
         public async Task<TResponse> Execute<TResponse>(IRequest<TResponse> request)
         {
             return await _mediator.Send(request);
+        }
+
+        public static void RegisterServices(IServiceCollection services, string connectionStringMongo = "mongodb://mongo1:30001,mongo2:30002/replicaSet=rs0", string databaseName = "transfers-service")
+        {
+            services.AddMediatR(Assembly.GetExecutingAssembly());
+            var mongoClient = new MongoClient(connectionStringMongo);
+
+            services.AddSingleton<IMongoClient>(s =>
+                mongoClient
+            );
+            var transfersDb = mongoClient.GetDatabase(databaseName);
+            services.AddSingleton<IMongoDatabase>(s =>
+                transfersDb
+            );
+            services.AddTransient<TransferRepository>();
+            services.AddHostedService<KafkaListenerService>();
         }
 
         private static IMediator BuildContainer(string connectionStringMongo)

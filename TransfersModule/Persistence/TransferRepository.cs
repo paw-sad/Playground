@@ -1,66 +1,48 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MongoDB.Driver;
-using TransfersModule.Events;
+using TransfersService.Persistence.Entities;
 
-namespace TransfersModule.Persistence
+namespace TransfersService.Persistence
 {
     internal class TransferRepository
     {
         private readonly IMongoDatabase _db;
-        private readonly IMongoClient _client;
-        private IClientSessionHandle _openedSession;
-        private IMongoCollection<ITransferEvent> _transferEvents => _db.GetCollection<ITransferEvent>("transfer-events");
         private IMongoCollection<Transfer> _transfers => _db.GetCollection<Transfer>("transfers");
 
-        public TransferRepository(IMongoDatabase db, IMongoClient client)
+        public TransferRepository(IMongoDatabase db)
         {
             _db = db;
-            _client = client;
         }
 
         public IMongoCollection<Transfer> Query() => _transfers;
 
-        public IClientSessionHandle StartTransaction()
+        public async Task Add(Domain.Transfer domainTransfer, CancellationToken ct)
         {
-            _openedSession = _client.StartSession();
-            _openedSession.StartTransaction();
-            return _client.StartSession();
-        }     
-        
-        public async Task CommitTransaction(CancellationToken ct)
-        {
-            await _openedSession.CommitTransactionAsync(ct);
+            Transfer transfer = Map(domainTransfer);
+            await _transfers.InsertOneAsync(transfer,null, ct);
         }
 
-        public Guid Persist(TransferCreatedEvent transferCreatedEvent)
+        private Transfer Map(Domain.Transfer domainTransfer)
         {
-            var transfer = Map(transferCreatedEvent);
-            _transfers.InsertOne(transfer);
-            _transferEvents.InsertOne(transferCreatedEvent);
-            return transfer.Id;
-        }
-
-        private Transfer Map(TransferCreatedEvent e)
-            => new Transfer()
+            return new Transfer
             {
-                Id = e.TransferId,
-                ReleasingClubId = e.ReleasingClubId,
-                EngagingClubId = e.EngagingClubId,
-                PlayerId = e.PlayerId,
-                State = TransferState.Confirmed,
-                CreatedOn = new DateTime(),
-                PlayersContract = e.PlayersContract,
-                Type = e.Type
+                Id = domainTransfer.Id,
+                EngagingClubId = domainTransfer.EngagingClubId,
+                ReleasingClubId = domainTransfer.ReleasingClubId,
+                PlayerId = domainTransfer.PlayerId,
+                PlayersContract = new PlayersContract
+                {
+                    EmploymentContractStart = domainTransfer.PlayersContract.EmploymentContractStart,
+                    EmploymentContractEnd = domainTransfer.PlayersContract.EmploymentContractEnd,
+                    Salary = domainTransfer.PlayersContract.Salary
+                },
+                State = (Entities.TransferState)domainTransfer.State,
+                CreatedOn = domainTransfer.CreatedOn,
+                Events = domainTransfer.Events.ToList()
             };
-
-        public async Task Persist(TransferCompletedEvent e, CancellationToken ct)
-        {
-            await _transferEvents.InsertOneAsync(e, cancellationToken: ct);
-            await _transfers.UpdateOneAsync(x => x.Id == e.TransferId, Builders<Transfer>
-                .Update.Set(x => x.State, TransferState.Completed), cancellationToken: ct);
         }
     }
 }

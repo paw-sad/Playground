@@ -1,7 +1,7 @@
 ﻿using System;
-using TransfersModule.Persistence;
+using TransfersService.Persistence.Entities;
 
-namespace TransfersModule.Events
+namespace TransfersService.Events
 {
     public class TransferCreatedEvent : ISerializableTransferEvent
     {
@@ -9,9 +9,7 @@ namespace TransfersModule.Events
         public int ReleasingClubId { get; set; }
         public int PlayerId { get; set; }
         public PlayersContract PlayersContract { get; set; }
-        public TransferType Type { get; set; }
         public Guid TransferId { get; set; }
-
         public string EventType { get; } = typeof(TransferCreatedEvent).FullName;
     }
 }
